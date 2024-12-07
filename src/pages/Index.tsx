@@ -16,13 +16,16 @@ const Index = () => {
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["jobs"],
     queryFn: async () => {
+      console.log("Fetching jobs...");
       const { data, error } = await supabase.from("jobs").select("*");
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching jobs:", error);
+        throw error;
+      }
+      console.log("Jobs fetched:", data);
       return data;
     },
   });
-
-  console.log("Jobs loaded:", jobs);
 
   return (
     <div className="container mx-auto py-8">
