@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,6 +32,8 @@ const JOB_ROLES = [
   "Auxiliar de Sonido",
 ] as const;
 
+type JobRole = typeof JOB_ROLES[number];
+
 export const AssignTechnicianDialog = ({
   open,
   onOpenChange,
@@ -39,7 +41,7 @@ export const AssignTechnicianDialog = ({
   jobTitle,
 }: AssignTechnicianDialogProps) => {
   const [selectedTechnician, setSelectedTechnician] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<JobRole | "">("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,7 +86,7 @@ export const AssignTechnicianDialog = ({
       const { error } = await supabase.from("job_assignments").insert({
         job_id: jobId,
         technician_id: selectedTechnician,
-        role: selectedRole,
+        role: selectedRole as JobRole, // Type assertion here is safe because we validated it's not empty
       });
 
       if (error) throw error;
@@ -116,7 +118,10 @@ export const AssignTechnicianDialog = ({
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label>Role</Label>
-            <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <Select
+              value={selectedRole}
+              onValueChange={(value) => setSelectedRole(value as JobRole)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
