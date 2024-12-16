@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateJobDialogProps {
   open: boolean;
@@ -19,9 +20,11 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Creating new job:", { title, startTime, endTime, location });
     
     try {
       const { error } = await supabase.from("jobs").insert({
@@ -33,6 +36,9 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
       });
 
       if (error) throw error;
+
+      // Invalidate and refetch jobs query
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
 
       toast({
         title: "Success",

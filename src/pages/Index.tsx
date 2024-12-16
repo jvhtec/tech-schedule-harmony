@@ -17,8 +17,17 @@ const Index = () => {
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["jobs"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("jobs").select("*");
-      if (error) throw error;
+      console.log("Fetching jobs...");
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .order('start_time', { ascending: true });
+      
+      if (error) {
+        console.error("Error fetching jobs:", error);
+        throw error;
+      }
+      console.log("Fetched jobs:", data);
       return data;
     },
   });
@@ -46,7 +55,6 @@ const Index = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Calendar Section - Now spans 3 columns */}
         <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Calendar</CardTitle>
@@ -93,7 +101,6 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Sidebar - Now takes 1 column */}
         <div className="space-y-6">
           <TechniciansList />
           <JobsList jobs={jobs} isLoading={isLoadingJobs} />
