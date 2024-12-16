@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           id: string
           job_id: string | null
+          role: Database["public"]["Enums"]["job_role"]
           status: string | null
           technician_id: string | null
         }
@@ -21,6 +22,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_id?: string | null
+          role: Database["public"]["Enums"]["job_role"]
           status?: string | null
           technician_id?: string | null
         }
@@ -28,6 +30,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_id?: string | null
+          role?: Database["public"]["Enums"]["job_role"]
           status?: string | null
           technician_id?: string | null
         }
@@ -110,7 +113,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      job_role:
+        | "Responsable de Sonido"
+        | "Tecnico Especialista"
+        | "Tecnico de Sonido"
+        | "Auxiliar de Sonido"
     }
     CompositeTypes: {
       [_ in never]: never

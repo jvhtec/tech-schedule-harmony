@@ -9,10 +9,12 @@ import { CreateJobDialog } from "@/components/CreateJobDialog";
 import { TechniciansList } from "@/components/TechniciansList";
 import { JobsList } from "@/components/JobsList";
 import { format } from "date-fns";
+import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
 
 const Index = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
 
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["jobs"],
@@ -83,7 +85,8 @@ const Index = () => {
                   {getJobsForDate(date).map((job) => (
                     <div
                       key={job.id}
-                      className="p-2 bg-blue-50 rounded-lg border border-blue-100"
+                      className="p-2 bg-blue-50 rounded-lg border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
+                      onClick={() => setSelectedJob(job)}
                     >
                       <p className="font-medium">{job.title}</p>
                       <p className="text-sm text-gray-600">
@@ -108,6 +111,15 @@ const Index = () => {
       </div>
 
       <CreateJobDialog open={isCreateJobOpen} onOpenChange={setIsCreateJobOpen} />
+      
+      {selectedJob && (
+        <AssignTechnicianDialog
+          open={!!selectedJob}
+          onOpenChange={(open) => !open && setSelectedJob(null)}
+          jobId={selectedJob.id}
+          jobTitle={selectedJob.title}
+        />
+      )}
     </div>
   );
 };
