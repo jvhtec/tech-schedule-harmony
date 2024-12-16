@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreateJobDialog } from "@/components/CreateJobDialog";
 import { TechniciansList } from "@/components/TechniciansList";
 import { JobsList } from "@/components/JobsList";
+import { format } from "date-fns";
 
 const Index = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -16,16 +17,24 @@ const Index = () => {
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
     queryKey: ["jobs"],
     queryFn: async () => {
-      console.log("Fetching jobs...");
       const { data, error } = await supabase.from("jobs").select("*");
-      if (error) {
-        console.error("Error fetching jobs:", error);
-        throw error;
-      }
-      console.log("Jobs fetched:", data);
+      if (error) throw error;
       return data;
     },
   });
+
+  // Function to get jobs for a specific date
+  const getJobsForDate = (date: Date) => {
+    if (!jobs) return [];
+    return jobs.filter((job) => {
+      const jobDate = new Date(job.start_time);
+      return (
+        jobDate.getDate() === date.getDate() &&
+        jobDate.getMonth() === date.getMonth() &&
+        jobDate.getFullYear() === date.getFullYear()
+      );
+    });
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -36,9 +45,9 @@ const Index = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Calendar Section */}
-        <Card className="md:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Calendar Section - Now spans 3 columns */}
+        <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Calendar</CardTitle>
           </CardHeader>
@@ -48,11 +57,43 @@ const Index = () => {
               selected={date}
               onSelect={setDate}
               className="rounded-md border w-full"
+              modifiers={{
+                hasJobs: (date) => getJobsForDate(date).length > 0,
+              }}
+              modifiersStyles={{
+                hasJobs: {
+                  backgroundColor: "rgb(219 234 254)",
+                },
+              }}
             />
+            {date && (
+              <div className="mt-4">
+                <h3 className="font-medium mb-2">
+                  Jobs for {format(date, "MMMM d, yyyy")}:
+                </h3>
+                <div className="space-y-2">
+                  {getJobsForDate(date).map((job) => (
+                    <div
+                      key={job.id}
+                      className="p-2 bg-blue-50 rounded-lg border border-blue-100"
+                    >
+                      <p className="font-medium">{job.title}</p>
+                      <p className="text-sm text-gray-600">
+                        {format(new Date(job.start_time), "h:mm a")} -{" "}
+                        {format(new Date(job.end_time), "h:mm a")}
+                      </p>
+                      {job.location && (
+                        <p className="text-sm text-gray-600">{job.location}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Sidebar */}
+        {/* Sidebar - Now takes 1 column */}
         <div className="space-y-6">
           <TechniciansList />
           <JobsList jobs={jobs} isLoading={isLoadingJobs} />
