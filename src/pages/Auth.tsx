@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { UserInfo } from "@/components/UserInfo";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -49,6 +50,9 @@ const Auth = () => {
 
   return (
     <div className="container max-w-lg mx-auto py-8">
+      <div className="flex justify-end mb-4">
+        <UserInfo />
+      </div>
       <h1 className="text-4xl font-bold text-center mb-8">Welcome</h1>
       <Card className="p-6">
         {isSignUp ? (
