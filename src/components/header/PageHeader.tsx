@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { UserInfo } from "@/components/UserInfo";
 import { Department } from "@/types/department";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 
 interface PageHeaderProps {
   department: Department;
@@ -10,6 +12,9 @@ interface PageHeaderProps {
 }
 
 export const PageHeader = ({ department, onCreateJob, onCreateTour }: PageHeaderProps) => {
+  const navigate = useNavigate();
+  const { userRole } = useAuth();
+  
   const departmentTitles = {
     sound: "Sound Department Tech Scheduler",
     lights: "Lights Department Tech Scheduler",
@@ -29,6 +34,16 @@ export const PageHeader = ({ department, onCreateJob, onCreateTour }: PageHeader
           <Button onClick={onCreateTour} variant="secondary">
             <Plus className="mr-2 h-4 w-4" /> Create Tour
           </Button>
+          {userRole === 'management' && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/settings')}
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <UserInfo />
       </div>
