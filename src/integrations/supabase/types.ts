@@ -57,6 +57,41 @@ export type Database = {
           },
         ]
       }
+      job_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          job_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          job_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_notes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           color: string | null
@@ -125,6 +160,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       technicians: {
         Row: {
           created_at: string
@@ -183,6 +239,7 @@ export type Database = {
         | "Tecnico Especialista"
         | "Tecnico de Sonido"
         | "Auxiliar de Sonido"
+      user_role: "management" | "logistics" | "technician"
       video_role:
         | "Responsable de Video"
         | "Tecnico de Video"
