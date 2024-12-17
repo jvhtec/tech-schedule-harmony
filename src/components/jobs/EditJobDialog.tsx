@@ -8,36 +8,41 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { Job } from "@/types/job";
+import { Department } from "@/types/department";
 
-interface CreateJobDialogProps {
+interface EditJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentDepartment: Department;
+  job: Job;
+  department: Department;
 }
 
-export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDialogProps) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [departments, setDepartments] = useState<Department[]>([currentDepartment]);
+export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDialogProps) => {
+  const [title, setTitle] = useState(job.title);
+  const [description, setDescription] = useState(job.description || "");
+  const [startTime, setStartTime] = useState(job.start_time);
+  const [endTime, setEndTime] = useState(job.end_time);
+  const [location, setLocation] = useState(job.location || "");
+  const [departments, setDepartments] = useState<Department[]>(job.departments);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating new job:", { title, startTime, endTime, location, departments });
     
     try {
-      const { error } = await supabase.from("jobs").insert({
-        title,
-        description,
-        start_time: startTime,
-        end_time: endTime,
-        location,
-        departments,
-      });
+      const { error } = await supabase
+        .from("jobs")
+        .update({
+          title,
+          description,
+          start_time: startTime,
+          end_time: endTime,
+          location,
+          departments,
+        })
+        .eq("id", job.id);
 
       if (error) throw error;
 
@@ -45,21 +50,15 @@ export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: Creat
 
       toast({
         title: "Success",
-        description: "Job created successfully",
+        description: "Job updated successfully",
       });
 
       onOpenChange(false);
-      setTitle("");
-      setDescription("");
-      setStartTime("");
-      setEndTime("");
-      setLocation("");
-      setDepartments([currentDepartment]);
     } catch (error) {
-      console.error("Error creating job:", error);
+      console.error("Error updating job:", error);
       toast({
         title: "Error",
-        description: "Failed to create job",
+        description: "Failed to update job",
         variant: "destructive",
       });
     }
@@ -77,7 +76,7 @@ export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: Creat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Job</DialogTitle>
+          <DialogTitle>Edit Job</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -132,11 +131,11 @@ export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: Creat
                 <div key={dept} className="flex items-center space-x-2">
                   <Checkbox
                     id={`dept-${dept}`}
-                    checked={departments.includes(dept)}
+                    checked={departments.includes(dept as Department)}
                     onCheckedChange={(checked) => 
-                      handleDepartmentChange(dept, checked as boolean)
+                      handleDepartmentChange(dept as Department, checked as boolean)
                     }
-                    disabled={dept === currentDepartment}
+                    disabled={dept === department}
                   />
                   <label
                     htmlFor={`dept-${dept}`}
@@ -148,7 +147,7 @@ export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: Creat
               ))}
             </div>
           </div>
-          <Button type="submit" className="w-full">Create Job</Button>
+          <Button type="submit" className="w-full">Update Job</Button>
         </form>
       </DialogContent>
     </Dialog>

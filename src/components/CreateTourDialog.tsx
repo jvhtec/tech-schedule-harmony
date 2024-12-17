@@ -20,7 +20,7 @@ import { useLocations } from "@/hooks/useLocations";
 interface CreateTourDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentDepartment: "sound" | "lights" | "video";
+  currentDepartment: Department;
 }
 
 export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: CreateTourDialogProps) => {
@@ -30,7 +30,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     { start: "", end: "", location: "" },
   ]);
   const [color, setColor] = useState("#8B5CF6");
-  const [departments, setDepartments] = useState<string[]>([currentDepartment]);
+  const [departments, setDepartments] = useState<Department[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: locations } = useLocations();
@@ -49,11 +49,11 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     setDates(newDates);
   };
 
-  const handleDepartmentChange = (department: string, checked: boolean) => {
+  const handleDepartmentChange = (dept: Department, checked: boolean) => {
     if (checked) {
-      setDepartments([...departments, department]);
+      setDepartments([...departments, dept]);
     } else {
-      setDepartments(departments.filter(d => d !== department));
+      setDepartments(departments.filter(d => d !== dept));
     }
   };
 
@@ -81,8 +81,8 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
       if (tourError) throw tourError;
 
       // Store unique locations
-      const uniqueLocations = [...new Set(dates.map((d) => d.location))];
-      for (const location of uniqueLocations) {
+      const unique_locations = [...new Set(dates.map((d) => d.location))];
+      for (const location of unique_locations) {
         if (location) {
           await supabase
             .from("locations")
@@ -111,7 +111,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
 
       if (datesError) throw datesError;
 
-      // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
       await queryClient.invalidateQueries({ queryKey: ["locations"] });
 

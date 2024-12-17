@@ -9,9 +9,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Department } from "@/types/department";
+import { TechnicianActions } from "./technicians/TechnicianActions";
 
 interface TechniciansListProps {
-  department: "sound" | "lights" | "video";
+  department: Department;
 }
 
 export const TechniciansList = ({ department }: TechniciansListProps) => {
@@ -21,7 +23,7 @@ export const TechniciansList = ({ department }: TechniciansListProps) => {
   const [phone, setPhone] = useState("");
   const [dni, setDni] = useState("");
   const [residencia, setResidencia] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState<"sound" | "lights" | "video">(department);
+  const [selectedDepartment, setSelectedDepartment] = useState<Department>(department);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -102,6 +104,7 @@ export const TechniciansList = ({ department }: TechniciansListProps) => {
                       <p className="text-sm text-muted-foreground">{tech.phone}</p>
                     )}
                   </div>
+                  <TechnicianActions technician={tech} />
                 </div>
               ))}
             </div>
@@ -163,7 +166,7 @@ export const TechniciansList = ({ department }: TechniciansListProps) => {
               <Label>Department</Label>
               <RadioGroup
                 value={selectedDepartment}
-                onValueChange={(value) => setSelectedDepartment(value as "sound" | "lights" | "video")}
+                onValueChange={(value) => setSelectedDepartment(value as Department)}
                 className="flex flex-col space-y-1"
               >
                 <div className="flex items-center space-x-2">

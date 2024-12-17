@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { AssignTechnicianDialog } from "./AssignTechnicianDialog";
-import { Department } from "@/types/job";
+import { Department } from "@/types/department";
 import { Job } from "@/types/job";
+import { JobActions } from "./jobs/JobActions";
 
 interface JobsListProps {
   jobs?: Job[];
@@ -35,25 +36,32 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
                   style={{
                     backgroundColor: job.color ? `${job.color}15` : "hsl(var(--secondary))",
                   }}
-                  onClick={() => setSelectedJob(job)}
                 >
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium">{job.title}</p>
-                    {job.job_type === "tour" && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                        Tour
-                      </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{job.title}</p>
+                      {job.job_type === "tour" && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                          Tour
+                        </span>
+                      )}
+                    </div>
+                    <JobActions job={job} department={department} />
+                  </div>
+                  <div 
+                    className="mt-2"
+                    onClick={() => setSelectedJob(job)}
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(job.start_time), "MMM d, h:mm a")} -{" "}
+                      {format(new Date(job.end_time), "h:mm a")}
+                    </p>
+                    {job.location && (
+                      <p className="text-sm text-muted-foreground">
+                        {job.location}
+                      </p>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(job.start_time), "MMM d, h:mm a")} -{" "}
-                    {format(new Date(job.end_time), "h:mm a")}
-                  </p>
-                  {job.location && (
-                    <p className="text-sm text-muted-foreground">
-                      {job.location}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>
