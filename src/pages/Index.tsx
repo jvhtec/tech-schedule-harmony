@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import CreateJobDialog from "@/components/CreateJobDialog";
 import { CreateTourDialog } from "@/components/CreateTourDialog";
 import { TechniciansList } from "@/components/TechniciansList";
@@ -68,7 +69,6 @@ const Index = ({ department }: IndexProps) => {
         <div className="container mx-auto">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <h1 className="text-2xl font-bold text-red-600">Error loading jobs</h1>
-            <UserInfo />
           </div>
           <p className="text-red-500">Failed to load jobs. Please try again later.</p>
         </div>
