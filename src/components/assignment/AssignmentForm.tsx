@@ -52,23 +52,20 @@ export const AssignmentForm = ({ jobId, technicians, onSuccess }: AssignmentForm
 
       if (error) throw error;
 
-      // Send email notification
-      const { data: sessionData } = await supabase.auth.getSession();
-      const response = await fetch("/functions/v1/send-job-notification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionData?.session?.access_token}`,
-        },
-        body: JSON.stringify({
-          jobId,
-          technicianId: selectedTechnician,
-          role: selectedRole,
-        }),
-      });
+      // Send email notification using Supabase Edge Function
+      const { error: functionError } = await supabase.functions.invoke(
+        "send-job-notification",
+        {
+          body: {
+            jobId,
+            technicianId: selectedTechnician,
+            role: selectedRole,
+          },
+        }
+      );
 
-      if (!response.ok) {
-        console.error("Failed to send email notification");
+      if (functionError) {
+        console.error("Failed to send email notification:", functionError);
       }
 
       toast({

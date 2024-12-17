@@ -23,6 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const { jobId, technicianId, role } = await req.json() as EmailRequest;
+    console.log("Received request:", { jobId, technicianId, role });
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -31,25 +32,27 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Fetch job details
-    const { data: job } = await supabaseClient
+    const { data: job, error: jobError } = await supabaseClient
       .from("jobs")
       .select("*")
       .eq("id", jobId)
       .single();
 
-    if (!job) {
-      throw new Error("Job not found");
+    if (jobError) {
+      console.error("Error fetching job:", jobError);
+      throw jobError;
     }
 
     // Fetch technician details
-    const { data: technician } = await supabaseClient
+    const { data: technician, error: techError } = await supabaseClient
       .from("technicians")
       .select("*")
       .eq("id", technicianId)
       .single();
 
-    if (!technician) {
-      throw new Error("Technician not found");
+    if (techError) {
+      console.error("Error fetching technician:", techError);
+      throw techError;
     }
 
     // Format dates
@@ -73,6 +76,8 @@ const handler = async (req: Request): Promise<Response> => {
       ${job.description ? `<p><strong>Descripción:</strong> ${job.description}</p>` : ''}
     `;
 
+    console.log("Sending email to:", technician.email);
+
     // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -90,10 +95,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!res.ok) {
       const error = await res.text();
+      console.error("Resend API error:", error);
       throw new Error(error);
     }
 
     const data = await res.json();
+    console.log("Email sent successfully:", data);
+
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
