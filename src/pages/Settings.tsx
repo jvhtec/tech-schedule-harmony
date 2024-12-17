@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import CreateUserDialog from "@/components/settings/CreateUserDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
-import UserInfo from "@/components/UserInfo";
+import { UserInfo } from "@/components/UserInfo";
 
 const Settings = () => {
   const navigate = useNavigate();
