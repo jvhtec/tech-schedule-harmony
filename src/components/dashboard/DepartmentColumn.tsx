@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
-import { format } from "date-fns";
 import { Job } from "@/types/job";
 import { JobCard } from "./JobCard";
 

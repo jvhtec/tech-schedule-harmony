@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DepartmentColumn from "@/components/dashboard/DepartmentColumn";
+import { DepartmentColumn } from "@/components/dashboard/DepartmentColumn";
 import { UserInfo } from "@/components/UserInfo";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,7 +66,7 @@ const Dashboard = () => {
             key={department}
             department={department}
             jobs={getJobsByDepartment(department)}
-            onDepartmentClick={() => handleDepartmentClick(department)}
+            onHeaderClick={() => handleDepartmentClick(department)}
           />
         ))}
       </div>
