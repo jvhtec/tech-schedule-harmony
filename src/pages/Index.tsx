@@ -12,15 +12,26 @@ import { JobsList } from "@/components/JobsList";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
 import { JobAssignments } from "@/components/JobAssignments";
+import { DepartmentNavigation } from "@/components/DepartmentNavigation";
 
-const Index = () => {
+interface IndexProps {
+  department: "sound" | "lights" | "video";
+}
+
+const Index = ({ department }: IndexProps) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [isCreateTourOpen, setIsCreateTourOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
+  const departmentTitles = {
+    sound: "Sound Department Tech Scheduler",
+    lights: "Lights Department Tech Scheduler",
+    video: "Video Department Tech Scheduler",
+  };
+
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
-    queryKey: ["jobs", date ? format(date, "yyyy-MM") : "all"],
+    queryKey: ["jobs", date ? format(date, "yyyy-MM") : "all", department],
     queryFn: async () => {
       console.log("Fetching jobs...");
       const start = date ? startOfMonth(date).toISOString() : undefined;
@@ -62,7 +73,9 @@ const Index = () => {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-slate-900">Tech Scheduler</h1>
+        <h1 className="text-4xl font-bold text-slate-900">
+          {departmentTitles[department]}
+        </h1>
         <div className="space-x-2">
           <Button onClick={() => setIsCreateJobOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Create Job
@@ -72,6 +85,8 @@ const Index = () => {
           </Button>
         </div>
       </div>
+
+      <DepartmentNavigation />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="md:col-span-3">
@@ -145,10 +160,15 @@ const Index = () => {
         </div>
       </div>
 
-      <CreateJobDialog open={isCreateJobOpen} onOpenChange={setIsCreateJobOpen} />
+      <CreateJobDialog 
+        open={isCreateJobOpen} 
+        onOpenChange={setIsCreateJobOpen}
+        currentDepartment={department}
+      />
       <CreateTourDialog
         open={isCreateTourOpen}
         onOpenChange={setIsCreateTourOpen}
+        currentDepartment={department}
       />
       
       {selectedJob && (

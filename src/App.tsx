@@ -11,7 +11,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Index department="sound" />} />
+          <Route path="/lights" element={<Index department="lights" />} />
+          <Route path="/video" element={<Index department="video" />} />
         </Routes>
       </Router>
       <Toaster />
