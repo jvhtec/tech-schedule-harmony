@@ -131,6 +131,8 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     }
   };
 
+  const availableDepartments: Department[] = ["sound", "lights", "video"];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -178,7 +180,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
           <div className="space-y-2">
             <Label>Departments</Label>
             <div className="flex flex-col gap-2">
-              {["sound", "lights", "video"].map((dept) => (
+              {availableDepartments.map((dept) => (
                 <div key={dept} className="flex items-center space-x-2">
                   <Checkbox
                     id={`dept-${dept}`}
