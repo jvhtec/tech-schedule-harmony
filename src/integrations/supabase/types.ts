@@ -53,33 +53,50 @@ export type Database = {
       }
       jobs: {
         Row: {
+          color: string | null
           created_at: string
           description: string | null
           end_time: string
           id: string
+          job_type: Database["public"]["Enums"]["job_type"]
           location: string | null
           start_time: string
           title: string
+          tour_id: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
           description?: string | null
           end_time: string
           id?: string
+          job_type?: Database["public"]["Enums"]["job_type"]
           location?: string | null
           start_time: string
           title: string
+          tour_id?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string
           description?: string | null
           end_time?: string
           id?: string
+          job_type?: Database["public"]["Enums"]["job_type"]
           location?: string | null
           start_time?: string
           title?: string
+          tour_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "jobs_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       technicians: {
         Row: {
@@ -118,6 +135,7 @@ export type Database = {
         | "Tecnico Especialista"
         | "Tecnico de Sonido"
         | "Auxiliar de Sonido"
+      job_type: "single" | "tour"
     }
     CompositeTypes: {
       [_ in never]: never

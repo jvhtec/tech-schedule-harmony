@@ -6,6 +6,9 @@ export interface Job {
   start_time: string;
   end_time: string;
   location: string | null;
+  job_type: "single" | "tour";
+  tour_id?: string;
+  color?: string;
 }
 
 export interface Technician {
@@ -22,4 +25,5 @@ export interface JobAssignment {
   job_id: string | null;
   technician_id: string | null;
   status: string | null;
+  role: "Responsable de Sonido" | "Tecnico Especialista" | "Tecnico de Sonido" | "Auxiliar de Sonido";
 }

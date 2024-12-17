@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CreateJobDialog } from "@/components/CreateJobDialog";
+import { CreateTourDialog } from "@/components/CreateTourDialog";
 import { TechniciansList } from "@/components/TechniciansList";
 import { JobsList } from "@/components/JobsList";
 import { format, startOfMonth, endOfMonth } from "date-fns";
@@ -15,6 +16,7 @@ import { JobAssignments } from "@/components/JobAssignments";
 const Index = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
+  const [isCreateTourOpen, setIsCreateTourOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
@@ -61,9 +63,14 @@ const Index = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold text-slate-900">Tech Scheduler</h1>
-        <Button onClick={() => setIsCreateJobOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create Job
-        </Button>
+        <div className="space-x-2">
+          <Button onClick={() => setIsCreateJobOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Create Job
+          </Button>
+          <Button onClick={() => setIsCreateTourOpen(true)} variant="secondary">
+            <Plus className="mr-2 h-4 w-4" /> Create Tour
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -95,17 +102,34 @@ const Index = () => {
                   {getJobsForDate(date).map((job) => (
                     <div
                       key={job.id}
-                      className="p-2 bg-blue-50 rounded-lg border border-blue-100 cursor-pointer hover:bg-blue-100 transition-colors"
+                      className="p-2 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
+                      style={{
+                        backgroundColor: job.color ? `${job.color}15` : undefined,
+                        borderColor: job.color || "hsl(var(--border))",
+                      }}
                       onClick={() => setSelectedJob(job)}
                     >
-                      <p className="font-medium">{job.title}</p>
-                      <p className="text-sm text-gray-600">
-                        {format(new Date(job.start_time), "h:mm a")} -{" "}
-                        {format(new Date(job.end_time), "h:mm a")}
-                      </p>
-                      {job.location && (
-                        <p className="text-sm text-gray-600">{job.location}</p>
-                      )}
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium">
+                            {job.title}
+                            {job.tour_id && (
+                              <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                Tour
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(job.start_time), "h:mm a")} -{" "}
+                            {format(new Date(job.end_time), "h:mm a")}
+                          </p>
+                          {job.location && (
+                            <p className="text-sm text-muted-foreground">
+                              {job.location}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                       <JobAssignments jobId={job.id} />
                     </div>
                   ))}
@@ -122,6 +146,10 @@ const Index = () => {
       </div>
 
       <CreateJobDialog open={isCreateJobOpen} onOpenChange={setIsCreateJobOpen} />
+      <CreateTourDialog
+        open={isCreateTourOpen}
+        onOpenChange={setIsCreateTourOpen}
+      />
       
       {selectedJob && (
         <AssignTechnicianDialog
