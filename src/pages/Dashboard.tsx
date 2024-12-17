@@ -17,10 +17,12 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState("7");
   const [currentDate] = useState(new Date());
-  const { userRole, session } = useAuth();
+  const { userRole, session, isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
 
-  const { data: jobs, isLoading } = useQuery({
+  console.log("Dashboard render - Auth state:", { userRole, session, isAuthLoading });
+
+  const { data: jobs, isLoading: isJobsLoading } = useQuery({
     queryKey: ["dashboard-jobs", timeRange, userRole, session?.user?.id],
     queryFn: async () => {
       console.log("Fetching jobs for dashboard...");
@@ -53,7 +55,7 @@ const Dashboard = () => {
       console.log("Fetched jobs:", data);
       return data as Job[];
     },
-    enabled: !!session, // Only run query when session exists
+    enabled: !!session && !isAuthLoading, // Only run query when session exists and auth is not loading
   });
 
   const handleLogout = async () => {
@@ -75,6 +77,15 @@ const Dashboard = () => {
   const filterJobsByDepartment = (department: Department) => {
     return jobs?.filter((job) => job.departments?.includes(department)) || [];
   };
+
+  // Show loading state while auth is being checked
+  if (isAuthLoading) {
+    return (
+      <div className="container mx-auto py-8 flex items-center justify-center">
+        <p className="text-lg">Loading authentication...</p>
+      </div>
+    );
+  }
 
   // Show a simplified view for technicians
   if (userRole === "technician") {
@@ -105,7 +116,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {isLoading ? (
+        {isJobsLoading ? (
           <div className="text-center">Loading jobs...</div>
         ) : (
           <div className="space-y-4">
@@ -168,7 +179,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {isLoading ? (
+      {isJobsLoading ? (
         <div className="text-center">Loading jobs...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

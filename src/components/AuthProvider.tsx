@@ -54,18 +54,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log("Fetching user role for userId:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching user role:", error);
+        throw error;
+      }
       
-      console.log("User role:", data.role);
+      console.log("User role fetched:", data.role);
       setUserRole(data.role);
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Error in fetchUserRole:", error);
+      setUserRole(null);
     } finally {
       setIsLoading(false);
     }
