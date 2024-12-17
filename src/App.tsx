@@ -47,6 +47,16 @@ function App() {
                 <Index department="sound" />
               </ProtectedRoute>
             } />
+            <Route path="/lights" element={
+              <ProtectedRoute>
+                <Index department="lights" />
+              </ProtectedRoute>
+            } />
+            <Route path="/video" element={
+              <ProtectedRoute>
+                <Index department="video" />
+              </ProtectedRoute>
+            } />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
