@@ -21,21 +21,26 @@ const Dashboard = () => {
   const { toast } = useToast();
 
   const { data: jobs, isLoading } = useQuery({
-    queryKey: ["dashboard-jobs", timeRange, userRole],
+    queryKey: ["dashboard-jobs", timeRange, userRole, session?.user?.id],
     queryFn: async () => {
       console.log("Fetching jobs for dashboard...");
       const endDate = addDays(endOfDay(currentDate), parseInt(timeRange));
       
       let query = supabase
         .from("jobs")
-        .select("*, job_assignments(technician_id)")
+        .select(`
+          *,
+          job_assignments!inner (
+            technician_id
+          )
+        `)
         .gte("start_time", startOfDay(currentDate).toISOString())
         .lte("start_time", endDate.toISOString())
         .order("start_time", { ascending: true });
 
       // If user is a technician, only show their assigned jobs
-      if (userRole === "technician" && session) {
-        query = query.contains("job_assignments.technician_id", [session.user.id]);
+      if (userRole === "technician" && session?.user?.id) {
+        query = query.eq("job_assignments.technician_id", session.user.id);
       }
 
       const { data, error } = await query;
@@ -48,6 +53,7 @@ const Dashboard = () => {
       console.log("Fetched jobs:", data);
       return data as Job[];
     },
+    enabled: !!session, // Only run query when session exists
   });
 
   const handleLogout = async () => {
