@@ -11,8 +11,20 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session);
+      if (session) {
+        console.log("User is already logged in, redirecting to dashboard");
+        navigate("/dashboard");
+      }
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session);
       if (event === "SIGNED_IN") {
@@ -26,6 +38,14 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-lg mx-auto py-8">
