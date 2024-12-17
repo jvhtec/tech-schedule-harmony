@@ -14,7 +14,7 @@ export const JobCalendar = ({ date, onSelectDate, getJobsForDate }: JobCalendarP
       mode="single"
       selected={date}
       onSelect={onSelectDate}
-      className="rounded-md border w-full max-w-md"
+      className="rounded-md border"
       modifiers={{
         hasJobs: (date) => getJobsForDate(date).length > 0,
       }}
