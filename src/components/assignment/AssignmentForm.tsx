@@ -43,7 +43,12 @@ interface AssignmentFormProps {
   department: Department;
 }
 
-export const AssignmentForm = ({ jobId, technicians, onSuccess, department }: AssignmentFormProps) => {
+export const AssignmentForm = ({
+  jobId,
+  technicians,
+  onSuccess,
+  department,
+}: AssignmentFormProps) => {
   const [selectedTechnician, setSelectedTechnician] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<string>("");
   const { toast } = useToast();
