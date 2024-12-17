@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -16,14 +17,14 @@ interface CreateUserDialogProps {
 type FormData = {
   email: string;
   password: string;
-  name: string;
   role: "management" | "logistics";
 };
 
 const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, reset, setValue, watch } = useForm<FormData>();
+  const queryClient = useQueryClient();
+  const { register, handleSubmit, reset, setValue } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -49,6 +50,9 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
           title: "Success",
           description: "User created successfully.",
         });
+        
+        // Invalidate the users query to refresh the list
+        queryClient.invalidateQueries({ queryKey: ['users'] });
         
         onOpenChange(false);
         reset();
@@ -86,13 +90,6 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
               id="password"
               type="password"
               {...register("password", { required: true })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              {...register("name", { required: true })}
             />
           </div>
           <div>
