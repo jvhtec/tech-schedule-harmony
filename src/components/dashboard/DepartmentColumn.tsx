@@ -1,30 +1,39 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { Job } from "@/types/job";
+import { Department } from "@/types/department";
 import { JobCard } from "./JobCard";
 
 interface DepartmentColumnProps {
-  department: string;
+  department: Department;
   jobs: Job[];
   onHeaderClick: () => void;
 }
 
 export const DepartmentColumn = ({ department, jobs, onHeaderClick }: DepartmentColumnProps) => {
+  const departmentTitles = {
+    sound: "Sound Department",
+    lights: "Lights Department",
+    video: "Video Department",
+  };
+
   return (
     <Card>
       <CardHeader 
-        className="cursor-pointer hover:bg-secondary/50 transition-colors"
+        className="cursor-pointer hover:bg-accent transition-colors"
         onClick={onHeaderClick}
       >
-        <CardTitle className="flex items-center gap-2 capitalize">
-          <Calendar className="h-5 w-5" />
-          {department}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-semibold">
+            {departmentTitles[department]}
+          </CardTitle>
+          <Calendar className="h-5 w-5 text-muted-foreground" />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {jobs.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No upcoming jobs
+            No jobs scheduled
           </p>
         ) : (
           jobs.map((job) => (
