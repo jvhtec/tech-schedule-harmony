@@ -14,25 +14,31 @@ export type Database = {
           created_at: string
           id: string
           job_id: string | null
-          role: Database["public"]["Enums"]["job_role"]
+          lights_role: Database["public"]["Enums"]["lights_role"] | null
+          sound_role: Database["public"]["Enums"]["sound_role"] | null
           status: string | null
           technician_id: string | null
+          video_role: Database["public"]["Enums"]["video_role"] | null
         }
         Insert: {
           created_at?: string
           id?: string
           job_id?: string | null
-          role: Database["public"]["Enums"]["job_role"]
+          lights_role?: Database["public"]["Enums"]["lights_role"] | null
+          sound_role?: Database["public"]["Enums"]["sound_role"] | null
           status?: string | null
           technician_id?: string | null
+          video_role?: Database["public"]["Enums"]["video_role"] | null
         }
         Update: {
           created_at?: string
           id?: string
           job_id?: string | null
-          role?: Database["public"]["Enums"]["job_role"]
+          lights_role?: Database["public"]["Enums"]["lights_role"] | null
+          sound_role?: Database["public"]["Enums"]["sound_role"] | null
           status?: string | null
           technician_id?: string | null
+          video_role?: Database["public"]["Enums"]["video_role"] | null
         }
         Relationships: [
           {
@@ -123,26 +129,32 @@ export type Database = {
         Row: {
           created_at: string
           department: Database["public"]["Enums"]["department"]
+          dni: string | null
           email: string
           id: string
           name: string
           phone: string | null
+          residencia: string | null
         }
         Insert: {
           created_at?: string
           department?: Database["public"]["Enums"]["department"]
+          dni?: string | null
           email: string
           id?: string
           name: string
           phone?: string | null
+          residencia?: string | null
         }
         Update: {
           created_at?: string
           department?: Database["public"]["Enums"]["department"]
+          dni?: string | null
           email?: string
           id?: string
           name?: string
           phone?: string | null
+          residencia?: string | null
         }
         Relationships: []
       }
@@ -161,6 +173,22 @@ export type Database = {
         | "Tecnico de Sonido"
         | "Auxiliar de Sonido"
       job_type: "single" | "tour"
+      lights_role:
+        | "Responsable de Iluminacion"
+        | "Tecnico especialista"
+        | "Tecnico de Iluminacion"
+        | "Auxiliar de Iluminacion"
+      sound_role:
+        | "Responsable de Sonido"
+        | "Tecnico Especialista"
+        | "Tecnico de Sonido"
+        | "Auxiliar de Sonido"
+      video_role:
+        | "Responsable de Video"
+        | "Tecnico de Video"
+        | "Operador/Realizador de Video"
+        | "Operador de Camara"
+        | "Auxiliar de Video"
     }
     CompositeTypes: {
       [_ in never]: never

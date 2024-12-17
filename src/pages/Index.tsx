@@ -156,7 +156,7 @@ const Index = ({ department }: IndexProps) => {
         </Card>
 
         <div className="space-y-6">
-          <TechniciansList />
+          <TechniciansList department={department} />
           <JobsList jobs={jobs} isLoading={isLoadingJobs} />
         </div>
       </div>
@@ -178,6 +178,7 @@ const Index = ({ department }: IndexProps) => {
           onOpenChange={(open) => !open && setSelectedJob(null)}
           jobId={selectedJob.id}
           jobTitle={selectedJob.title}
+          department={department}
         />
       )}
     </div>

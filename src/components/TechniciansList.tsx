@@ -6,20 +6,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-export const TechniciansList = () => {
+interface TechniciansListProps {
+  department: "sound" | "lights" | "video";
+}
+
+export const TechniciansList = ({ department }: TechniciansListProps) => {
   const [isAddTechOpen, setIsAddTechOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [dni, setDni] = useState("");
+  const [residencia, setResidencia] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState<"sound" | "lights" | "video">(department);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: technicians, isLoading } = useQuery({
-    queryKey: ["technicians"],
+    queryKey: ["technicians", department],
     queryFn: async () => {
-      const { data, error } = await supabase.from("technicians").select("*");
+      console.log("Fetching technicians for department:", department);
+      const { data, error } = await supabase
+        .from("technicians")
+        .select("*")
+        .eq("department", department);
       if (error) throw error;
       return data;
     },
@@ -33,6 +46,9 @@ export const TechniciansList = () => {
         name,
         email,
         phone,
+        dni,
+        residencia,
+        department: selectedDepartment,
       });
 
       if (error) throw error;
@@ -42,10 +58,14 @@ export const TechniciansList = () => {
         description: "Technician added successfully",
       });
 
+      queryClient.invalidateQueries({ queryKey: ["technicians"] });
       setIsAddTechOpen(false);
       setName("");
       setEmail("");
       setPhone("");
+      setDni("");
+      setResidencia("");
+      setSelectedDepartment(department);
     } catch (error) {
       console.error("Error adding technician:", error);
       toast({
@@ -78,6 +98,9 @@ export const TechniciansList = () => {
                   <div>
                     <p className="font-medium">{tech.name}</p>
                     <p className="text-sm text-muted-foreground">{tech.email}</p>
+                    {tech.phone && (
+                      <p className="text-sm text-muted-foreground">{tech.phone}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -119,6 +142,43 @@ export const TechniciansList = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dni">DNI</Label>
+              <Input
+                id="dni"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="residencia">Residencia</Label>
+              <Input
+                id="residencia"
+                value={residencia}
+                onChange={(e) => setResidencia(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Department</Label>
+              <RadioGroup
+                value={selectedDepartment}
+                onValueChange={(value) => setSelectedDepartment(value as "sound" | "lights" | "video")}
+                className="flex flex-col space-y-1"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sound" id="sound" />
+                  <Label htmlFor="sound">Sound</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="lights" id="lights" />
+                  <Label htmlFor="lights">Lights</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="video" id="video" />
+                  <Label htmlFor="video">Video</Label>
+                </div>
+              </RadioGroup>
             </div>
             <Button type="submit" className="w-full">Add Technician</Button>
           </form>

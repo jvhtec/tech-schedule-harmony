@@ -14,6 +14,7 @@ interface AssignTechnicianDialogProps {
   onOpenChange: (open: boolean) => void;
   jobId: string;
   jobTitle: string;
+  department: "sound" | "lights" | "video";
 }
 
 export const AssignTechnicianDialog = ({
@@ -21,11 +22,15 @@ export const AssignTechnicianDialog = ({
   onOpenChange,
   jobId,
   jobTitle,
+  department,
 }: AssignTechnicianDialogProps) => {
   const { data: technicians } = useQuery({
-    queryKey: ["technicians"],
+    queryKey: ["technicians", department],
     queryFn: async () => {
-      const { data, error } = await supabase.from("technicians").select("*");
+      const { data, error } = await supabase
+        .from("technicians")
+        .select("*")
+        .eq("department", department);
       if (error) throw error;
       return data;
     },
@@ -60,6 +65,7 @@ export const AssignTechnicianDialog = ({
             jobId={jobId}
             technicians={technicians}
             onSuccess={() => onOpenChange(false)}
+            department={department}
           />
           <CurrentAssignments assignments={currentAssignments} />
         </div>

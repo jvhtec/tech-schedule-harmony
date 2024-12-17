@@ -16,20 +16,34 @@ interface AssignmentFormProps {
   jobId: string;
   technicians?: any[];
   onSuccess: () => void;
+  department: "sound" | "lights" | "video";
 }
 
-export const JOB_ROLES = [
-  "Responsable de Sonido",
-  "Tecnico Especialista",
-  "Tecnico de Sonido",
-  "Auxiliar de Sonido",
-] as const;
+const DEPARTMENT_ROLES = {
+  sound: [
+    "Responsable de Sonido",
+    "Tecnico Especialista",
+    "Tecnico de Sonido",
+    "Auxiliar de Sonido",
+  ],
+  lights: [
+    "Responsable de Iluminacion",
+    "Tecnico especialista",
+    "Tecnico de Iluminacion",
+    "Auxiliar de Iluminacion",
+  ],
+  video: [
+    "Responsable de Video",
+    "Tecnico de Video",
+    "Operador/Realizador de Video",
+    "Operador de Camara",
+    "Auxiliar de Video",
+  ],
+} as const;
 
-export type JobRole = typeof JOB_ROLES[number];
-
-export const AssignmentForm = ({ jobId, technicians, onSuccess }: AssignmentFormProps) => {
+export const AssignmentForm = ({ jobId, technicians, onSuccess, department }: AssignmentFormProps) => {
   const [selectedTechnician, setSelectedTechnician] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<JobRole | "">("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,29 +58,14 @@ export const AssignmentForm = ({ jobId, technicians, onSuccess }: AssignmentForm
     }
 
     try {
+      const roleColumn = `${department}_role`;
       const { error } = await supabase.from("job_assignments").insert({
         job_id: jobId,
         technician_id: selectedTechnician,
-        role: selectedRole,
+        [roleColumn]: selectedRole,
       });
 
       if (error) throw error;
-
-      // Send email notification using Supabase Edge Function
-      const { error: functionError } = await supabase.functions.invoke(
-        "send-job-notification",
-        {
-          body: {
-            jobId,
-            technicianId: selectedTechnician,
-            role: selectedRole,
-          },
-        }
-      );
-
-      if (functionError) {
-        console.error("Failed to send email notification:", functionError);
-      }
 
       toast({
         title: "Success",
@@ -93,13 +92,13 @@ export const AssignmentForm = ({ jobId, technicians, onSuccess }: AssignmentForm
         <Label>Role</Label>
         <Select
           value={selectedRole}
-          onValueChange={(value) => setSelectedRole(value as JobRole)}
+          onValueChange={setSelectedRole}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
           <SelectContent>
-            {JOB_ROLES.map((role) => (
+            {DEPARTMENT_ROLES[department].map((role) => (
               <SelectItem key={role} value={role}>
                 {role}
               </SelectItem>
