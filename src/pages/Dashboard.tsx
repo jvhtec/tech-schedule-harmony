@@ -6,11 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format, startOfToday } from "date-fns";
 import { Department } from "@/types/department";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const today = startOfToday();
   const [selectedDate] = useState(today);
+  const { userRole } = useAuth();
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ['jobs', format(selectedDate, 'yyyy-MM-dd')],
@@ -57,7 +61,19 @@ const Dashboard = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Dashboard</h1>
-        <UserInfo />
+        <div className="flex items-center gap-4">
+          {userRole === 'management' && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/settings')}
+              title="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          )}
+          <UserInfo />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
