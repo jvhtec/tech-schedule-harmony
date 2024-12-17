@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DepartmentColumn } from "@/components/dashboard/DepartmentColumn";
 import { UserInfo } from "@/components/UserInfo";
@@ -25,12 +25,22 @@ const TIME_SPANS = {
   "3months": { label: "3 Months", days: 90 },
 };
 
+const DEFAULT_TIME_SPAN = "1week";
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const today = startOfToday();
-  const [timeSpan, setTimeSpan] = useState("1week");
+  const [timeSpan, setTimeSpan] = useState(() => {
+    // Try to get the saved time span from localStorage, fallback to default
+    return localStorage.getItem("preferredTimeSpan") || DEFAULT_TIME_SPAN;
+  });
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const { userRole } = useAuth();
+
+  // Save time span preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("preferredTimeSpan", timeSpan);
+  }, [timeSpan]);
 
   const { data: jobs, isLoading } = useQuery({
     queryKey: ['jobs', timeSpan],
