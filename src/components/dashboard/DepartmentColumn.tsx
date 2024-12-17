@@ -23,6 +23,11 @@ export const DepartmentColumn = ({
     video: "Video Department",
   };
 
+  // Filter jobs to only show those that include this department
+  const filteredJobs = jobs.filter(job => 
+    job.departments && job.departments.includes(department)
+  );
+
   return (
     <Card>
       <CardHeader 
@@ -37,12 +42,12 @@ export const DepartmentColumn = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {jobs.length === 0 ? (
+        {filteredJobs.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             No jobs scheduled
           </p>
         ) : (
-          jobs.map((job) => (
+          filteredJobs.map((job) => (
             <JobCard 
               key={job.id} 
               job={job} 
