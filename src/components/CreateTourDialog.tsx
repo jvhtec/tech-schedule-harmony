@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,15 +20,17 @@ import { useLocations } from "@/hooks/useLocations";
 interface CreateTourDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentDepartment: "sound" | "lights" | "video";
 }
 
-export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) => {
+export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: CreateTourDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<{ start: string; end: string; location: string }[]>([
     { start: "", end: "", location: "" },
   ]);
   const [color, setColor] = useState("#8B5CF6");
+  const [departments, setDepartments] = useState<string[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: locations } = useLocations();
@@ -46,9 +49,17 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
     setDates(newDates);
   };
 
+  const handleDepartmentChange = (department: string, checked: boolean) => {
+    if (checked) {
+      setDepartments([...departments, department]);
+    } else {
+      setDepartments(departments.filter(d => d !== department));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating new tour:", { title, dates, color });
+    console.log("Creating new tour:", { title, dates, color, departments });
 
     try {
       // First, create the main tour record
@@ -62,6 +73,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
           location: dates[0].location,
           job_type: "tour" as const,
           color,
+          departments,
         })
         .select()
         .single();
@@ -90,6 +102,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
         job_type: "single" as const,
         tour_id: tourData.id,
         color,
+        departments,
       }));
 
       const { error: datesError } = await supabase
@@ -112,6 +125,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
       setDescription("");
       setDates([{ start: "", end: "", location: "" }]);
       setColor("#8B5CF6");
+      setDepartments([currentDepartment]);
     } catch (error) {
       console.error("Error creating tour:", error);
       toast({
@@ -165,6 +179,29 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
             >
               Add Date
             </Button>
+          </div>
+          <div className="space-y-2">
+            <Label>Departments</Label>
+            <div className="flex flex-col gap-2">
+              {["sound", "lights", "video"].map((dept) => (
+                <div key={dept} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`dept-${dept}`}
+                    checked={departments.includes(dept)}
+                    onCheckedChange={(checked) => 
+                      handleDepartmentChange(dept, checked as boolean)
+                    }
+                    disabled={dept === currentDepartment}
+                  />
+                  <label
+                    htmlFor={`dept-${dept}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Color</Label>

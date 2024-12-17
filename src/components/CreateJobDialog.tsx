@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -11,20 +12,22 @@ import { useQueryClient } from "@tanstack/react-query";
 interface CreateJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentDepartment: "sound" | "lights" | "video";
 }
 
-export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) => {
+export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
+  const [departments, setDepartments] = useState<string[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating new job:", { title, startTime, endTime, location });
+    console.log("Creating new job:", { title, startTime, endTime, location, departments });
     
     try {
       const { error } = await supabase.from("jobs").insert({
@@ -33,11 +36,12 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
         start_time: startTime,
         end_time: endTime,
         location,
+        departments,
       });
 
       if (error) throw error;
 
-      // Invalidate and refetch jobs query
+      // Invalidate and refetch jobs query for all departments
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
 
       toast({
@@ -51,6 +55,7 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
       setStartTime("");
       setEndTime("");
       setLocation("");
+      setDepartments([currentDepartment]);
     } catch (error) {
       console.error("Error creating job:", error);
       toast({
@@ -58,6 +63,14 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
         description: "Failed to create job",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDepartmentChange = (department: string, checked: boolean) => {
+    if (checked) {
+      setDepartments([...departments, department]);
+    } else {
+      setDepartments(departments.filter(d => d !== department));
     }
   };
 
@@ -112,6 +125,29 @@ export const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) =>
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Departments</Label>
+            <div className="flex flex-col gap-2">
+              {["sound", "lights", "video"].map((dept) => (
+                <div key={dept} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`dept-${dept}`}
+                    checked={departments.includes(dept)}
+                    onCheckedChange={(checked) => 
+                      handleDepartmentChange(dept, checked as boolean)
+                    }
+                    disabled={dept === currentDepartment}
+                  />
+                  <label
+                    htmlFor={`dept-${dept}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
           <Button type="submit" className="w-full">Create Job</Button>
         </form>

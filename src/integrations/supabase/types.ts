@@ -55,6 +55,7 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string
+          departments: Database["public"]["Enums"]["department"][] | null
           description: string | null
           end_time: string
           id: string
@@ -67,6 +68,7 @@ export type Database = {
         Insert: {
           color?: string | null
           created_at?: string
+          departments?: Database["public"]["Enums"]["department"][] | null
           description?: string | null
           end_time: string
           id?: string
@@ -79,6 +81,7 @@ export type Database = {
         Update: {
           color?: string | null
           created_at?: string
+          departments?: Database["public"]["Enums"]["department"][] | null
           description?: string | null
           end_time?: string
           id?: string
@@ -119,6 +122,7 @@ export type Database = {
       technicians: {
         Row: {
           created_at: string
+          department: Database["public"]["Enums"]["department"]
           email: string
           id: string
           name: string
@@ -126,6 +130,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          department?: Database["public"]["Enums"]["department"]
           email: string
           id?: string
           name: string
@@ -133,6 +138,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          department?: Database["public"]["Enums"]["department"]
           email?: string
           id?: string
           name?: string
@@ -148,6 +154,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      department: "sound" | "lights" | "video"
       job_role:
         | "Responsable de Sonido"
         | "Tecnico Especialista"

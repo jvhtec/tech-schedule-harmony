@@ -40,6 +40,7 @@ const Index = ({ department }: IndexProps) => {
       const query = supabase
         .from("jobs")
         .select("*")
+        .contains('departments', [department])
         .order("start_time", { ascending: true });
 
       if (start && end) {
