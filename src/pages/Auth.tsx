@@ -15,12 +15,14 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log("Auth page mounted");
+    
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Auth page - Initial session check:", session);
       if (session) {
         console.log("User is already logged in, redirecting to dashboard");
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
       setIsLoading(false);
     });
@@ -33,7 +35,7 @@ const Auth = () => {
           title: "Welcome!",
           description: "You have successfully signed in.",
         });
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     });
 

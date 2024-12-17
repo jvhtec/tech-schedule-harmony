@@ -21,9 +21,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("AuthProvider mounted");
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("AuthProvider - Initial session:", session);
@@ -45,12 +46,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setUserRole(null);
         setIsLoading(false);
-        navigate("/auth");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const fetchUserRole = async (userId: string) => {
     try {
