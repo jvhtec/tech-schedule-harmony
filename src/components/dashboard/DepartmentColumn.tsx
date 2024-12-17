@@ -8,9 +8,15 @@ interface DepartmentColumnProps {
   department: Department;
   jobs: Job[];
   onHeaderClick: () => void;
+  onSelectJob: (job: Job) => void;
 }
 
-export const DepartmentColumn = ({ department, jobs, onHeaderClick }: DepartmentColumnProps) => {
+export const DepartmentColumn = ({ 
+  department, 
+  jobs, 
+  onHeaderClick,
+  onSelectJob 
+}: DepartmentColumnProps) => {
   const departmentTitles = {
     sound: "Sound Department",
     lights: "Lights Department",
@@ -37,7 +43,11 @@ export const DepartmentColumn = ({ department, jobs, onHeaderClick }: Department
           </p>
         ) : (
           jobs.map((job) => (
-            <JobCard key={job.id} job={job} />
+            <JobCard 
+              key={job.id} 
+              job={job} 
+              onClick={() => onSelectJob(job)}
+            />
           ))
         )}
       </CardContent>

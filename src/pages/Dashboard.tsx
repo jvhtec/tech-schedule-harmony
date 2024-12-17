@@ -4,16 +4,18 @@ import { DepartmentColumn } from "@/components/dashboard/DepartmentColumn";
 import { UserInfo } from "@/components/UserInfo";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { addDays, format, startOfToday } from "date-fns";
+import { addDays, format, startOfToday, endOfDay, startOfDay } from "date-fns";
 import { Department } from "@/types/department";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const today = startOfToday();
   const [selectedDate] = useState(today);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
   const { userRole } = useAuth();
 
   const { data: jobs, isLoading } = useQuery({
@@ -23,8 +25,9 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('jobs')
         .select('*')
-        .gte('start_time', format(selectedDate, 'yyyy-MM-dd'))
-        .lte('start_time', format(addDays(selectedDate, 1), 'yyyy-MM-dd'));
+        .gte('start_time', startOfDay(selectedDate).toISOString())
+        .lte('start_time', endOfDay(selectedDate).toISOString())
+        .order('start_time', { ascending: true });
 
       if (error) {
         console.error("Error fetching jobs:", error);
@@ -84,10 +87,21 @@ const Dashboard = () => {
               department={department}
               jobs={getJobsByDepartment(department)}
               onHeaderClick={() => handleDepartmentClick(department)}
+              onSelectJob={setSelectedJob}
             />
           ))}
         </div>
       </div>
+
+      {selectedJob && (
+        <AssignTechnicianDialog
+          open={!!selectedJob}
+          onOpenChange={(open) => !open && setSelectedJob(null)}
+          jobId={selectedJob.id}
+          jobTitle={selectedJob.title}
+          department={selectedJob.departments?.[0] || "sound"}
+        />
+      )}
     </div>
   );
 };

@@ -4,16 +4,18 @@ import { JobAssignments } from "@/components/JobAssignments";
 
 interface JobCardProps {
   job: Job;
+  onClick: () => void;
 }
 
-export const JobCard = ({ job }: JobCardProps) => {
+export const JobCard = ({ job, onClick }: JobCardProps) => {
   return (
     <div
-      className="p-4 rounded-lg border transition-colors"
+      className="p-4 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
       style={{
         backgroundColor: job.color ? `${job.color}15` : undefined,
         borderColor: job.color || "hsl(var(--border))",
       }}
+      onClick={onClick}
     >
       <div className="space-y-2">
         <div className="flex items-start justify-between">
