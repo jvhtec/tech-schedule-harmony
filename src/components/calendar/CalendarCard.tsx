@@ -19,7 +19,7 @@ export const CalendarCard = ({
   isLoading 
 }: CalendarCardProps) => {
   return (
-    <Card className="lg:col-span-3">
+    <Card className="lg:col-span-3 max-w-3xl mx-auto w-full">
       <CardHeader>
         <CardTitle>Calendar</CardTitle>
       </CardHeader>
@@ -30,11 +30,13 @@ export const CalendarCard = ({
           </div>
         ) : (
           <div className="space-y-6">
-            <JobCalendar
-              date={date}
-              onSelectDate={onSelectDate}
-              getJobsForDate={getJobsForDate}
-            />
+            <div className="flex justify-center">
+              <JobCalendar
+                date={date}
+                onSelectDate={onSelectDate}
+                getJobsForDate={getJobsForDate}
+              />
+            </div>
             {date && (
               <DailyJobsList
                 date={date}
