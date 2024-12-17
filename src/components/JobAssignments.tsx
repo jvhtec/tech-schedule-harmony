@@ -8,6 +8,12 @@ interface JobAssignmentsProps {
   department?: Department;
 }
 
+interface TechnicianData {
+  name: string;
+  email: string;
+  department: Department;
+}
+
 export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
   const { data: assignments } = useQuery({
     queryKey: ["job-assignments", jobId],
@@ -35,8 +41,8 @@ export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
   // Filter assignments based on department if specified
   const filteredAssignments = department
     ? assignments.filter(assignment => {
-        const techDepartment = (assignment.technicians as { department: Department }).department;
-        return techDepartment === department;
+        const technicianData = assignment.technicians as TechnicianData;
+        return technicianData.department === department;
       })
     : assignments;
 
@@ -52,7 +58,7 @@ export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
             className="text-sm text-muted-foreground flex items-center gap-1"
           >
             <span className="font-medium">
-              {(assignment.technicians as { name: string }).name}
+              {(assignment.technicians as TechnicianData).name}
             </span>
             <span className="text-xs">({role})</span>
           </div>
