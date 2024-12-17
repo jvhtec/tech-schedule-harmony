@@ -15,13 +15,13 @@ interface EditUserDialogProps {
   user: {
     id: string;
     name: string;
-    role: "management" | "logistics";
+    role: "management" | "logistics" | "technician";
   } | null;
 }
 
 type FormData = {
   name: string;
-  role: "management" | "logistics";
+  role: "management" | "logistics" | "technician";
 };
 
 const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps) => {
@@ -117,7 +117,7 @@ const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps) => {
           <div>
             <Label htmlFor="role">Role</Label>
             <Select 
-              onValueChange={(value) => setValue("role", value as "management" | "logistics")}
+              onValueChange={(value) => setValue("role", value as "management" | "logistics" | "technician")}
               defaultValue={user?.role}
             >
               <SelectTrigger>
@@ -126,6 +126,7 @@ const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps) => {
               <SelectContent>
                 <SelectItem value="management">Management</SelectItem>
                 <SelectItem value="logistics">Logistics</SelectItem>
+                <SelectItem value="technician">Technician</SelectItem>
               </SelectContent>
             </Select>
           </div>

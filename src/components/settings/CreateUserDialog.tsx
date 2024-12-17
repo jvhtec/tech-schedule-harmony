@@ -17,7 +17,7 @@ interface CreateUserDialogProps {
 type FormData = {
   email: string;
   password: string;
-  role: "management" | "logistics";
+  role: "management" | "logistics" | "technician";
 };
 
 const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
@@ -51,9 +51,7 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
           description: "User created successfully.",
         });
         
-        // Invalidate the users query to refresh the list
         queryClient.invalidateQueries({ queryKey: ['users'] });
-        
         onOpenChange(false);
         reset();
       }
@@ -94,13 +92,14 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
           </div>
           <div>
             <Label htmlFor="role">Role</Label>
-            <Select onValueChange={(value) => setValue("role", value as "management" | "logistics")}>
+            <Select onValueChange={(value) => setValue("role", value as "management" | "logistics" | "technician")}>
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="management">Management</SelectItem>
                 <SelectItem value="logistics">Logistics</SelectItem>
+                <SelectItem value="technician">Technician</SelectItem>
               </SelectContent>
             </Select>
           </div>

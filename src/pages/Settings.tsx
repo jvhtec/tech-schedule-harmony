@@ -19,7 +19,7 @@ const Settings = () => {
   const [editingUser, setEditingUser] = useState<{
     id: string;
     name: string;
-    role: "management" | "logistics";
+    role: "management" | "logistics" | "technician";
   } | null>(null);
 
   const { data: users, isLoading, error } = useQuery({
