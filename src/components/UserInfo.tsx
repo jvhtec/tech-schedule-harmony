@@ -1,6 +1,6 @@
 import { useAuth } from "@/components/AuthProvider";
 
-const UserInfo = () => {
+export const UserInfo = () => {
   const { session, userRole } = useAuth();
 
   if (!session) return null;
@@ -16,5 +16,3 @@ const UserInfo = () => {
     </div>
   );
 };
-
-export default UserInfo;
