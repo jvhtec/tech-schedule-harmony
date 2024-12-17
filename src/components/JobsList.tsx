@@ -45,11 +45,6 @@ export const JobsList = ({ jobs, isLoading }: JobsListProps) => {
                   {job.location && (
                     <p className="text-sm text-muted-foreground">{job.location}</p>
                   )}
-                  {job.description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {job.description}
-                    </p>
-                  )}
                 </div>
               ))}
             </div>

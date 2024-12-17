@@ -8,8 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreateJobDialog } from "@/components/CreateJobDialog";
 import { TechniciansList } from "@/components/TechniciansList";
 import { JobsList } from "@/components/JobsList";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
+import { JobAssignments } from "@/components/JobAssignments";
 
 const Index = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -17,13 +18,22 @@ const Index = () => {
   const [selectedJob, setSelectedJob] = useState<any>(null);
 
   const { data: jobs, isLoading: isLoadingJobs } = useQuery({
-    queryKey: ["jobs"],
+    queryKey: ["jobs", date ? format(date, "yyyy-MM") : "all"],
     queryFn: async () => {
       console.log("Fetching jobs...");
-      const { data, error } = await supabase
+      const start = date ? startOfMonth(date).toISOString() : undefined;
+      const end = date ? endOfMonth(date).toISOString() : undefined;
+
+      const query = supabase
         .from("jobs")
         .select("*")
-        .order('start_time', { ascending: true });
+        .order("start_time", { ascending: true });
+
+      if (start && end) {
+        query.gte("start_time", start).lte("start_time", end);
+      }
+
+      const { data, error } = await query;
       
       if (error) {
         console.error("Error fetching jobs:", error);
@@ -96,6 +106,7 @@ const Index = () => {
                       {job.location && (
                         <p className="text-sm text-gray-600">{job.location}</p>
                       )}
+                      <JobAssignments jobId={job.id} />
                     </div>
                   ))}
                 </div>
