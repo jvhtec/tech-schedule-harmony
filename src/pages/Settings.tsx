@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import CreateUserDialog from "@/components/settings/CreateUserDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import UserInfo from "@/components/UserInfo";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -18,11 +19,13 @@ const Settings = () => {
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
+      console.log("Fetching users...");
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select(`
           id,
           role,
+          name,
           created_at
         `)
         .order('created_at', { ascending: false });
@@ -32,6 +35,7 @@ const Settings = () => {
         throw error;
       }
 
+      console.log("Fetched users:", profiles);
       return profiles;
     },
     enabled: userRole === 'management'
@@ -49,15 +53,18 @@ const Settings = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex items-center gap-4 mb-8">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="text-4xl font-bold text-slate-900">Settings</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-4xl font-bold text-slate-900">Settings</h1>
+        </div>
+        <UserInfo />
       </div>
 
       <div className="grid gap-6">
@@ -83,7 +90,7 @@ const Settings = () => {
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
                     <div>
-                      <p className="font-medium">{user.id}</p>
+                      <p className="font-medium">{user.name}</p>
                       <p className="text-sm text-muted-foreground capitalize">
                         Role: {user.role}
                       </p>
