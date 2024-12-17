@@ -78,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Sending email to:", technician.email);
 
-    // Send email using Resend
+    // Send email using Resend with your domain
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -86,7 +86,7 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Acme <onboarding@resend.dev>",
+        from: "Sector Pro <updates@sector.pro>",
         to: [technician.email],
         subject: `Nueva asignación de trabajo: ${job.title}`,
         html: emailHtml,
