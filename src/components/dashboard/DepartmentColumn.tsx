@@ -52,6 +52,7 @@ export const DepartmentColumn = ({
               key={job.id} 
               job={job} 
               onClick={() => onSelectJob(job)}
+              department={department}
             />
           ))
         )}

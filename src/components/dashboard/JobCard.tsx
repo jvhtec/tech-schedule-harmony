@@ -1,13 +1,15 @@
 import { format } from "date-fns";
 import { Job } from "@/types/job";
+import { Department } from "@/types/department";
 import { JobAssignments } from "@/components/JobAssignments";
 
 interface JobCardProps {
   job: Job;
   onClick: () => void;
+  department: Department;
 }
 
-export const JobCard = ({ job, onClick }: JobCardProps) => {
+export const JobCard = ({ job, onClick, department }: JobCardProps) => {
   return (
     <div
       className="p-4 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
@@ -32,7 +34,7 @@ export const JobCard = ({ job, onClick }: JobCardProps) => {
           <p>{format(new Date(job.start_time), "MMM d, h:mm a")}</p>
           {job.location && <p>{job.location}</p>}
         </div>
-        <JobAssignments jobId={job.id} />
+        <JobAssignments jobId={job.id} department={department} />
       </div>
     </div>
   );

@@ -1,35 +1,50 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Assignment } from "@/types/assignment";
+import { Department } from "@/types/department";
 
 interface JobAssignmentsProps {
   jobId: string;
+  department?: Department;
 }
 
-export const JobAssignments = ({ jobId }: JobAssignmentsProps) => {
+export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
   const { data: assignments } = useQuery({
     queryKey: ["job-assignments", jobId],
     queryFn: async () => {
+      console.log("Fetching assignments for job:", jobId);
       const { data, error } = await supabase
         .from("job_assignments")
         .select(`
           *,
           technicians (
             name,
-            email
+            email,
+            department
           )
         `)
         .eq("job_id", jobId);
       if (error) throw error;
+      console.log("Assignments data:", data);
       return data as Assignment[];
     },
   });
 
   if (!assignments?.length) return null;
 
+  // Filter assignments based on department if specified
+  const filteredAssignments = department
+    ? assignments.filter(assignment => {
+        const techDepartment = (assignment.technicians as { department: Department }).department;
+        return techDepartment === department;
+      })
+    : assignments;
+
+  if (!filteredAssignments.length) return null;
+
   return (
     <div className="mt-2 space-y-1">
-      {assignments.map((assignment) => {
+      {filteredAssignments.map((assignment) => {
         const role = assignment.sound_role || assignment.lights_role || assignment.video_role;
         return (
           <div
