@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("AuthProvider - Initial session:", session);
+      console.log("Initial session check:", session);
       setSession(session);
       if (session) {
         fetchUserRole(session.user.id);
@@ -37,12 +36,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("AuthProvider - Auth state changed:", event, session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session);
       setSession(session);
       
       if (session) {
-        await fetchUserRole(session.user.id);
+        fetchUserRole(session.user.id);
       } else {
         setUserRole(null);
         setIsLoading(false);
@@ -54,30 +53,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      console.log("Fetching user role for userId:", userId);
+      console.log("Fetching user role for:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", userId)
         .single();
 
-      if (error) {
-        console.error("Error fetching user role:", error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log("User role fetched:", data.role);
-      setUserRole(data.role);
+      console.log("User role fetched:", data?.role);
+      setUserRole(data?.role);
     } catch (error) {
-      console.error("Error in fetchUserRole:", error);
+      console.error("Error fetching user role:", error);
       setUserRole(null);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const value = {
+    session,
+    userRole,
+    isLoading,
+  };
+
+  console.log("AuthProvider rendering with:", value);
+
   return (
-    <AuthContext.Provider value={{ session, userRole, isLoading }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
