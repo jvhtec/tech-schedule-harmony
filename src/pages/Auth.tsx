@@ -132,7 +132,7 @@ const Auth = () => {
               <Label htmlFor="department">Department</Label>
               <Select
                 value={formData.department}
-                onValueChange={(value) => setFormData({ ...formData, department: value })}
+                onValueChange={(value: Department) => setFormData({ ...formData, department: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select department" />
@@ -195,11 +195,6 @@ const Auth = () => {
           redirectTo={window.location.origin}
           view="sign_in"
         />
-        <div className="mt-4 text-center">
-          <Button variant="link" onClick={() => setIsSignUp(true)}>
-            Don't have an account? Sign up here
-          </Button>
-        </div>
       </Card>
     </div>
   );
