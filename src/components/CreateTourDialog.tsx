@@ -12,11 +12,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { TourDateInput } from "./tour/TourDateInput";
+import { ColorPicker } from "./tour/ColorPicker";
+import { useLocations } from "@/hooks/useLocations";
 
 interface CreateTourDialogProps {
   open: boolean;
@@ -26,31 +24,31 @@ interface CreateTourDialogProps {
 export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [dates, setDates] = useState<{ start: string; end: string }[]>([
-    { start: "", end: "" },
+  const [dates, setDates] = useState<{ start: string; end: string; location: string }[]>([
+    { start: "", end: "", location: "" },
   ]);
-  const [location, setLocation] = useState("");
-  const [color, setColor] = useState("#8B5CF6"); // Default color
+  const [color, setColor] = useState("#8B5CF6");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: locations } = useLocations();
 
   const handleAddDate = () => {
-    setDates([...dates, { start: "", end: "" }]);
+    setDates([...dates, { start: "", end: "", location: "" }]);
   };
 
   const handleDateChange = (
     index: number,
-    field: "start" | "end",
+    field: "start" | "end" | "location",
     value: string
   ) => {
     const newDates = [...dates];
-    newDates[index][field] = value;
+    newDates[index] = { ...newDates[index], [field]: value };
     setDates(newDates);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating new tour:", { title, dates, location, color });
+    console.log("Creating new tour:", { title, dates, color });
 
     try {
       // First, create the main tour record
@@ -59,9 +57,9 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
         .insert({
           title,
           description,
-          start_time: dates[0].start, // Use first date as tour start
-          end_time: dates[dates.length - 1].end, // Use last date as tour end
-          location,
+          start_time: dates[0].start,
+          end_time: dates[dates.length - 1].end,
+          location: dates[0].location,
           job_type: "tour",
           color,
         })
@@ -70,13 +68,25 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
 
       if (tourError) throw tourError;
 
-      // Then create individual date entries linked to the tour
+      // Store unique locations
+      const uniqueLocations = [...new Set(dates.map((d) => d.location))];
+      for (const location of uniqueLocations) {
+        if (location) {
+          await supabase
+            .from("locations")
+            .insert({ name: location })
+            .onConflict("name")
+            .ignore();
+        }
+      }
+
+      // Create individual date entries linked to the tour
       const dateEntries = dates.map((date) => ({
         title: `${title} (Tour Date)`,
         description,
         start_time: date.start,
         end_time: date.end,
-        location,
+        location: date.location,
         job_type: "single",
         tour_id: tourData.id,
         color,
@@ -88,8 +98,9 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
 
       if (datesError) throw datesError;
 
-      // Invalidate and refetch jobs query
+      // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["locations"] });
 
       toast({
         title: "Success",
@@ -99,8 +110,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
       onOpenChange(false);
       setTitle("");
       setDescription("");
-      setDates([{ start: "", end: "" }]);
-      setLocation("");
+      setDates([{ start: "", end: "", location: "" }]);
       setColor("#8B5CF6");
     } catch (error) {
       console.error("Error creating tour:", error);
@@ -139,28 +149,13 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
           <div className="space-y-2">
             <Label>Tour Dates</Label>
             {dates.map((date, index) => (
-              <div key={index} className="grid grid-cols-2 gap-2">
-                <div>
-                  <Input
-                    type="datetime-local"
-                    value={date.start}
-                    onChange={(e) =>
-                      handleDateChange(index, "start", e.target.value)
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <Input
-                    type="datetime-local"
-                    value={date.end}
-                    onChange={(e) =>
-                      handleDateChange(index, "end", e.target.value)
-                    }
-                    required
-                  />
-                </div>
-              </div>
+              <TourDateInput
+                key={index}
+                index={index}
+                date={date}
+                onDateChange={handleDateChange}
+                locations={locations}
+              />
             ))}
             <Button
               type="button"
@@ -172,55 +167,8 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
             </Button>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
             <Label>Color</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <div
-                    className="h-4 w-4 rounded-full mr-2"
-                    style={{ backgroundColor: color }}
-                  />
-                  {color}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64">
-                <div className="grid grid-cols-5 gap-2">
-                  {[
-                    "#8B5CF6",
-                    "#D946EF",
-                    "#F97316",
-                    "#0EA5E9",
-                    "#6E59A5",
-                    "#FEC6A1",
-                    "#E5DEFF",
-                    "#FFDEE2",
-                    "#FDE1D3",
-                    "#D3E4FD",
-                  ].map((c) => (
-                    <button
-                      key={c}
-                      className={`h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                        color === c ? "ring-2 ring-offset-2" : ""
-                      }`}
-                      style={{ backgroundColor: c }}
-                      onClick={() => setColor(c)}
-                      type="button"
-                    />
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+            <ColorPicker color={color} onChange={setColor} />
           </div>
           <Button type="submit" className="w-full">
             Create Tour
