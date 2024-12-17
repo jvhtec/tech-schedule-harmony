@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import CreateUserDialog from "@/components/settings/CreateUserDialog";
+import EditUserDialog from "@/components/settings/EditUserDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { UserInfo } from "@/components/UserInfo";
@@ -15,6 +16,11 @@ const Settings = () => {
   const { toast } = useToast();
   const { userRole } = useAuth();
   const [createUserOpen, setCreateUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<{
+    id: string;
+    name: string;
+    role: "management" | "logistics";
+  } | null>(null);
 
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
@@ -111,6 +117,13 @@ const Settings = () => {
                         Role: {user.role}
                       </p>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingUser(user)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -122,6 +135,12 @@ const Settings = () => {
       <CreateUserDialog 
         open={createUserOpen} 
         onOpenChange={setCreateUserOpen}
+      />
+      
+      <EditUserDialog
+        open={!!editingUser}
+        onOpenChange={(open) => !open && setEditingUser(null)}
+        user={editingUser}
       />
     </div>
   );
