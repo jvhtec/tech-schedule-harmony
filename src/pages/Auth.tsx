@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { LoginForm } from "@/components/auth/LoginForm";
 
@@ -33,7 +34,18 @@ const Auth = () => {
         {isSignUp ? (
           <SignUpForm onBack={() => setIsSignUp(false)} />
         ) : (
-          <LoginForm />
+          <div className="space-y-4">
+            <LoginForm />
+            <div className="text-center">
+              <Button
+                variant="link"
+                onClick={() => setIsSignUp(true)}
+                className="text-sm"
+              >
+                Don't have an account? Sign up
+              </Button>
+            </div>
+          </div>
         )}
       </Card>
     </div>

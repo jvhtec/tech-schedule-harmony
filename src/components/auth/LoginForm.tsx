@@ -20,6 +20,7 @@ export const LoginForm = () => {
       providers={[]}
       redirectTo={window.location.origin}
       view="sign_in"
+      showLinks={false}
     />
   );
 };
