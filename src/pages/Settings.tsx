@@ -16,7 +16,7 @@ const Settings = () => {
   const { userRole } = useAuth();
   const [createUserOpen, setCreateUserOpen] = useState(false);
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       console.log("Fetching users...");
@@ -51,6 +51,20 @@ const Settings = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-bold text-red-600">
+            Error loading settings
+          </h1>
+          <UserInfo />
+        </div>
+        <Button onClick={() => navigate(-1)}>Go Back</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center justify-between mb-8">
@@ -81,7 +95,9 @@ const Settings = () => {
             </p>
             
             {isLoading ? (
-              <p>Loading users...</p>
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
             ) : (
               <div className="space-y-4">
                 {users?.map((user) => (
