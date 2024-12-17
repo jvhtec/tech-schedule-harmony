@@ -58,33 +58,35 @@ const Dashboard = () => {
   const departments: Department[] = ["sound", "lights", "video"];
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-4">
-          {userRole === 'management' && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigate('/settings')}
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          )}
-          <UserInfo />
+    <div className="min-h-screen flex flex-col px-4 py-6 md:py-8">
+      <div className="container mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold">Dashboard</h1>
+          <div className="flex items-center gap-4">
+            {userRole === 'management' && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navigate('/settings')}
+                title="Settings"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
+            <UserInfo />
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {departments.map((department) => (
-          <DepartmentColumn
-            key={department}
-            department={department}
-            jobs={getJobsByDepartment(department)}
-            onHeaderClick={() => handleDepartmentClick(department)}
-          />
-        ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {departments.map((department) => (
+            <DepartmentColumn
+              key={department}
+              department={department}
+              jobs={getJobsByDepartment(department)}
+              onHeaderClick={() => handleDepartmentClick(department)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

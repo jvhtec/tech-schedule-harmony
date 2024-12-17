@@ -28,7 +28,7 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Loading jobs...</p>
           ) : filteredJobs.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {filteredJobs.map((job) => (
                 <div
                   key={job.id}
@@ -37,16 +37,18 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
                     backgroundColor: job.color ? `${job.color}15` : "hsl(var(--secondary))",
                   }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{job.title}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{job.title}</p>
                       {job.job_type === "tour" && (
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                        <span className="inline-block text-xs bg-primary/10 text-primary px-2 py-0.5 rounded mt-1">
                           Tour
                         </span>
                       )}
                     </div>
-                    <JobActions job={job} department={department} />
+                    <div className="flex-shrink-0">
+                      <JobActions job={job} department={department} />
+                    </div>
                   </div>
                   <div 
                     className="mt-2"
@@ -57,7 +59,7 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
                       {format(new Date(job.end_time), "h:mm a")}
                     </p>
                     {job.location && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground truncate">
                         {job.location}
                       </p>
                     )}

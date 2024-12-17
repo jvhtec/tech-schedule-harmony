@@ -10,12 +10,13 @@ export const DepartmentNavigation = () => {
   ];
 
   return (
-    <div className="flex gap-2 mb-4">
+    <div className="flex flex-wrap gap-2 mb-6">
       {departments.map((dept) => (
         <Button
           key={dept.path}
           variant="outline"
           onClick={() => navigate(dept.path)}
+          className="flex-1 md:flex-none"
         >
           {dept.name} Department
         </Button>

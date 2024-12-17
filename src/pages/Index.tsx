@@ -75,114 +75,118 @@ const Index = ({ department }: IndexProps) => {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-red-600">Error loading jobs</h1>
-          <UserInfo />
+      <div className="min-h-screen flex flex-col px-4 py-6 md:py-8">
+        <div className="container mx-auto">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <h1 className="text-2xl font-bold text-red-600">Error loading jobs</h1>
+            <UserInfo />
+          </div>
+          <p className="text-red-500">Failed to load jobs. Please try again later.</p>
         </div>
-        <p className="text-red-500">Failed to load jobs. Please try again later.</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-bold text-slate-900">
-          {departmentTitles[department]}
-        </h1>
-        <div className="flex items-center gap-4">
-          <div className="flex space-x-2">
-            <Button onClick={() => setIsCreateJobOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Create Job
-            </Button>
-            <Button onClick={() => setIsCreateTourOpen(true)} variant="secondary">
-              <Plus className="mr-2 h-4 w-4" /> Create Tour
-            </Button>
+    <div className="min-h-screen flex flex-col px-4 py-6 md:py-8">
+      <div className="container mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-slate-900 break-words">
+            {departmentTitles[department]}
+          </h1>
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setIsCreateJobOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Create Job
+              </Button>
+              <Button onClick={() => setIsCreateTourOpen(true)} variant="secondary">
+                <Plus className="mr-2 h-4 w-4" /> Create Tour
+              </Button>
+            </div>
+            <UserInfo />
           </div>
-          <UserInfo />
         </div>
-      </div>
 
-      <DepartmentNavigation />
+        <DepartmentNavigation />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="md:col-span-3">
-          <CardHeader>
-            <CardTitle>Calendar</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingJobs ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <>
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border w-full"
-                  modifiers={{
-                    hasJobs: (date) => getJobsForDate(date).length > 0,
-                  }}
-                  modifiersStyles={{
-                    hasJobs: {
-                      backgroundColor: "rgb(219 234 254)",
-                    },
-                  }}
-                />
-                {date && (
-                  <div className="mt-4">
-                    <h3 className="font-medium mb-2">
-                      Jobs for {format(date, "MMMM d, yyyy")}:
-                    </h3>
-                    <div className="space-y-2">
-                      {getJobsForDate(date).map((job) => (
-                        <div
-                          key={job.id}
-                          className="p-2 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
-                          style={{
-                            backgroundColor: job.color ? `${job.color}15` : undefined,
-                            borderColor: job.color || "hsl(var(--border))",
-                          }}
-                          onClick={() => setSelectedJob(job)}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="font-medium">
-                                {job.title}
-                                {job.tour_id && (
-                                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                                    Tour
-                                  </span>
-                                )}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(job.start_time), "h:mm a")} -{" "}
-                                {format(new Date(job.end_time), "h:mm a")}
-                              </p>
-                              {job.location && (
-                                <p className="text-sm text-muted-foreground">
-                                  {job.location}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle>Calendar</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              {isLoadingJobs ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    className="rounded-md border w-full"
+                    modifiers={{
+                      hasJobs: (date) => getJobsForDate(date).length > 0,
+                    }}
+                    modifiersStyles={{
+                      hasJobs: {
+                        backgroundColor: "rgb(219 234 254)",
+                      },
+                    }}
+                  />
+                  {date && (
+                    <div>
+                      <h3 className="font-medium mb-4">
+                        Jobs for {format(date, "MMMM d, yyyy")}:
+                      </h3>
+                      <div className="space-y-3">
+                        {getJobsForDate(date).map((job) => (
+                          <div
+                            key={job.id}
+                            className="p-3 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
+                            style={{
+                              backgroundColor: job.color ? `${job.color}15` : undefined,
+                              borderColor: job.color || "hsl(var(--border))",
+                            }}
+                            onClick={() => setSelectedJob(job)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="font-medium">
+                                  {job.title}
+                                  {job.tour_id && (
+                                    <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                      Tour
+                                    </span>
+                                  )}
                                 </p>
-                              )}
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(job.start_time), "h:mm a")} -{" "}
+                                  {format(new Date(job.end_time), "h:mm a")}
+                                </p>
+                                {job.location && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {job.location}
+                                  </p>
+                                )}
+                              </div>
                             </div>
+                            <JobAssignments jobId={job.id} />
                           </div>
-                          <JobAssignments jobId={job.id} />
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-        <div className="space-y-6">
-          <TechniciansList department={department} />
-          <JobsList jobs={jobs} isLoading={isLoadingJobs} department={department} />
+          <div className="space-y-6">
+            <TechniciansList department={department} />
+            <JobsList jobs={jobs} isLoading={isLoadingJobs} department={department} />
+          </div>
         </div>
       </div>
 
