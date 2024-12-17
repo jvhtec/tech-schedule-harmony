@@ -36,8 +36,8 @@ export const PageHeader = ({ department, onCreateJob, onCreateTour }: PageHeader
           {departmentTitles[department]}
         </h1>
       </div>
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Button onClick={onCreateJob}>
             <Plus className="mr-2 h-4 w-4" /> Create Job
           </Button>
