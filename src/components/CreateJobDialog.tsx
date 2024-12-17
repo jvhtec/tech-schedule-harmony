@@ -7,10 +7,11 @@ import { useState } from "react";
 interface CreateJobDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentDepartment: Department;
 }
 
-const CreateJobDialog = ({ open, onOpenChange }: CreateJobDialogProps) => {
-  const [selectedDepartments, setSelectedDepartments] = useState<Department[]>([]);
+const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDialogProps) => {
+  const [selectedDepartments, setSelectedDepartments] = useState<Department[]>([currentDepartment]);
 
   const availableDepartments: Department[] = ["sound", "lights", "video"];
 

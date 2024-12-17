@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CreateJobDialog } from "@/components/CreateJobDialog";
+import CreateJobDialog from "@/components/CreateJobDialog";
 import { CreateTourDialog } from "@/components/CreateTourDialog";
 import { TechniciansList } from "@/components/TechniciansList";
 import { JobsList } from "@/components/JobsList";
