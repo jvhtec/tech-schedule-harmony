@@ -17,7 +17,7 @@ const Auth = () => {
   useEffect(() => {
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session);
+      console.log("Auth page - Initial session check:", session);
       if (session) {
         console.log("User is already logged in, redirecting to dashboard");
         navigate("/dashboard");
