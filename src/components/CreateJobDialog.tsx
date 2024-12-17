@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { Department } from "@/types/department";
 
 interface CreateJobDialogProps {
   open: boolean;
@@ -154,3 +155,4 @@ export const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: Creat
     </Dialog>
   );
 };
+

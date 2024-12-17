@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<Index department="sound" />} />
           <Route path="/lights" element={<Index department="lights" />} />
           <Route path="/video" element={<Index department="video" />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Router>
       <Toaster />
