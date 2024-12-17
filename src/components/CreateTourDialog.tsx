@@ -60,7 +60,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
           start_time: dates[0].start,
           end_time: dates[dates.length - 1].end,
           location: dates[0].location,
-          job_type: "tour",
+          job_type: "tour" as const,
           color,
         })
         .select()
@@ -75,8 +75,8 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
           await supabase
             .from("locations")
             .insert({ name: location })
-            .onConflict("name")
-            .ignore();
+            .select()
+            .maybeSingle();
         }
       }
 
@@ -87,7 +87,7 @@ export const CreateTourDialog = ({ open, onOpenChange }: CreateTourDialogProps) 
         start_time: date.start,
         end_time: date.end,
         location: date.location,
-        job_type: "single",
+        job_type: "single" as const,
         tour_id: tourData.id,
         color,
       }));
