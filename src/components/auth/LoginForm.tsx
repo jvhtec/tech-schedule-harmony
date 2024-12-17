@@ -20,22 +20,29 @@ export const LoginForm = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
 
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-    } catch (error) {
+      if (data?.user) {
+        console.log("Login successful:", data.user);
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+        navigate("/");
+      }
+    } catch (error: any) {
       console.error("Error during login:", error);
       toast({
         title: "Error",
-        description: "Invalid login credentials. Please try again.",
+        description: error.message || "Invalid login credentials. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -53,6 +60,7 @@ export const LoginForm = () => {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
+          disabled={loading}
         />
       </div>
       <div>
@@ -63,6 +71,7 @@ export const LoginForm = () => {
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
+          disabled={loading}
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
