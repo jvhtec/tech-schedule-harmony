@@ -86,10 +86,28 @@ export const AssignTechnicianDialog = ({
       const { error } = await supabase.from("job_assignments").insert({
         job_id: jobId,
         technician_id: selectedTechnician,
-        role: selectedRole as JobRole, // Type assertion here is safe because we validated it's not empty
+        role: selectedRole,
       });
 
       if (error) throw error;
+
+      // Send email notification
+      const response = await fetch("/functions/v1/send-job-notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabase.auth.session()?.access_token}`,
+        },
+        body: JSON.stringify({
+          jobId,
+          technicianId: selectedTechnician,
+          role: selectedRole,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to send email notification");
+      }
 
       toast({
         title: "Success",
