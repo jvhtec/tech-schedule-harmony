@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 export const LoginForm = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,28 +18,26 @@ export const LoginForm = () => {
     setLoading(true);
 
     try {
-      // Simplified login call without destructuring data immediately
-      const response = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      console.log("Attempting login with email:", formData.email);
+      const { error } = await supabase.auth.signInWithPassword(formData);
+
+      if (error) {
+        console.error("Supabase auth error:", error);
+        throw error;
+      }
+
+      console.log("Login successful");
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
       });
-
-      if (response.error) {
-        console.error("Login error:", response.error);
-        throw response.error;
-      }
-
-      // Only access data after confirming there's no error
-      if (response.data.user) {
-        console.log("Login successful:", response.data.user);
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully logged in.",
-        });
-        // Let the auth state change handler handle navigation
-      }
     } catch (error: any) {
-      console.error("Error during login:", error);
+      console.error("Login error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
       toast({
         title: "Error",
         description: error.message || "Invalid login credentials. Please try again.",
