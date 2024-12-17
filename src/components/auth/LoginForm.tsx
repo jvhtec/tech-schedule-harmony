@@ -34,12 +34,14 @@ export const LoginForm = () => {
           name: authError.name
         });
         
-        // Handle database schema error specifically
-        if (authError.message?.includes("Database error querying schema")) {
-          throw new Error("Unable to connect to the authentication service. Please try again later or contact support.");
+        // Handle specific error cases
+        if (authError.message?.includes("Invalid login credentials")) {
+          throw new Error("Invalid email or password. Please try again.");
+        } else if (authError.message?.includes("Database error")) {
+          throw new Error("System is temporarily unavailable. Please try again in a few moments.");
+        } else {
+          throw authError;
         }
-        
-        throw authError;
       }
 
       console.log("Login successful:", data);
