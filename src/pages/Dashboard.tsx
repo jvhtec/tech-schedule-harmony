@@ -10,23 +10,39 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const TIME_SPANS = {
+  "1week": { label: "1 Week", days: 7 },
+  "2weeks": { label: "2 Weeks", days: 14 },
+  "1month": { label: "1 Month", days: 30 },
+  "3months": { label: "3 Months", days: 90 },
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const today = startOfToday();
-  const [selectedDate] = useState(today);
+  const [timeSpan, setTimeSpan] = useState("1week");
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const { userRole } = useAuth();
 
   const { data: jobs, isLoading } = useQuery({
-    queryKey: ['jobs', format(selectedDate, 'yyyy-MM-dd')],
+    queryKey: ['jobs', timeSpan],
     queryFn: async () => {
-      console.log("Fetching jobs for date:", format(selectedDate, 'yyyy-MM-dd'));
+      console.log("Fetching jobs...");
+      const endDate = addDays(today, TIME_SPANS[timeSpan as keyof typeof TIME_SPANS].days);
+      
       const { data, error } = await supabase
         .from('jobs')
         .select('*')
-        .gte('start_time', startOfDay(selectedDate).toISOString())
-        .lte('start_time', endOfDay(selectedDate).toISOString())
+        .gte('start_time', startOfDay(today).toISOString())
+        .lte('start_time', endOfDay(endDate).toISOString())
         .order('start_time', { ascending: true });
 
       if (error) {
@@ -64,7 +80,26 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col px-4 py-6 md:py-8">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold">Dashboard</h1>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl md:text-4xl font-bold">Dashboard</h1>
+            <div className="w-[180px]">
+              <Select
+                value={timeSpan}
+                onValueChange={(value) => setTimeSpan(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select time span" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(TIME_SPANS).map(([value, { label }]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             {userRole === 'management' && (
               <Button
