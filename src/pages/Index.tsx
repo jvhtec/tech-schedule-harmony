@@ -13,9 +13,10 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { AssignTechnicianDialog } from "@/components/AssignTechnicianDialog";
 import { JobAssignments } from "@/components/JobAssignments";
 import { DepartmentNavigation } from "@/components/DepartmentNavigation";
+import { Department } from "@/types/job";
 
 interface IndexProps {
-  department: "sound" | "lights" | "video";
+  department: Department;
 }
 
 const Index = ({ department }: IndexProps) => {
@@ -157,7 +158,7 @@ const Index = ({ department }: IndexProps) => {
 
         <div className="space-y-6">
           <TechniciansList department={department} />
-          <JobsList jobs={jobs} isLoading={isLoadingJobs} />
+          <JobsList jobs={jobs} isLoading={isLoadingJobs} department={department} />
         </div>
       </div>
 

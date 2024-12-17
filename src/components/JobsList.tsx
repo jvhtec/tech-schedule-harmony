@@ -2,25 +2,16 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { AssignTechnicianDialog } from "./AssignTechnicianDialog";
-
-interface Job {
-  id: string;
-  title: string;
-  start_time: string;
-  end_time: string;
-  location?: string;
-  description?: string;
-  job_type: "single" | "tour";
-  tour_id?: string;
-  color?: string;
-}
+import { Department } from "@/types/job";
+import { Job } from "@/types/job";
 
 interface JobsListProps {
   jobs?: Job[];
   isLoading: boolean;
+  department: Department;
 }
 
-export const JobsList = ({ jobs, isLoading }: JobsListProps) => {
+export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   // Filter out tour dates (jobs with tour_id) and show only main tour entries
@@ -78,6 +69,7 @@ export const JobsList = ({ jobs, isLoading }: JobsListProps) => {
           onOpenChange={(open) => !open && setSelectedJob(null)}
           jobId={selectedJob.id}
           jobTitle={selectedJob.title}
+          department={department}
         />
       )}
     </>

@@ -11,13 +11,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-
-interface AssignmentFormProps {
-  jobId: string;
-  technicians?: any[];
-  onSuccess: () => void;
-  department: "sound" | "lights" | "video";
-}
+import { Department } from "@/types/job";
+import { Technician } from "@/types/technician";
 
 const DEPARTMENT_ROLES = {
   sound: [
@@ -40,6 +35,13 @@ const DEPARTMENT_ROLES = {
     "Auxiliar de Video",
   ],
 } as const;
+
+interface AssignmentFormProps {
+  jobId: string;
+  technicians?: Technician[];
+  onSuccess: () => void;
+  department: Department;
+}
 
 export const AssignmentForm = ({ jobId, technicians, onSuccess, department }: AssignmentFormProps) => {
   const [selectedTechnician, setSelectedTechnician] = useState<string>("");
