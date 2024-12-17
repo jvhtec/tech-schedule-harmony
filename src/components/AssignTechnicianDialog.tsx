@@ -1,20 +1,22 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { AssignmentForm } from "./assignment/AssignmentForm";
-import { CurrentAssignments } from "./assignment/CurrentAssignments";
+import { Department } from "@/types/department";
+import { Technician } from "@/types/technician";
 
 interface AssignTechnicianDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   jobId: string;
   jobTitle: string;
-  department: "sound" | "lights" | "video";
+  department: Department;
 }
 
 export const AssignTechnicianDialog = ({
@@ -24,33 +26,22 @@ export const AssignTechnicianDialog = ({
   jobTitle,
   department,
 }: AssignTechnicianDialogProps) => {
-  const { data: technicians } = useQuery({
+  const { data: technicians, isLoading } = useQuery({
     queryKey: ["technicians", department],
     queryFn: async () => {
+      console.log("Fetching technicians for department:", department);
       const { data, error } = await supabase
         .from("technicians")
         .select("*")
         .eq("department", department);
-      if (error) throw error;
-      return data;
-    },
-  });
 
-  const { data: currentAssignments } = useQuery({
-    queryKey: ["job-assignments", jobId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("job_assignments")
-        .select(`
-          *,
-          technicians (
-            name,
-            email
-          )
-        `)
-        .eq("job_id", jobId);
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching technicians:", error);
+        throw error;
+      }
+      
+      console.log("Fetched technicians:", data);
+      return data as Technician[];
     },
   });
 
@@ -60,15 +51,18 @@ export const AssignTechnicianDialog = ({
         <DialogHeader>
           <DialogTitle>Assign Technician to {jobTitle}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 mt-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center p-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
           <AssignmentForm
             jobId={jobId}
             technicians={technicians}
             onSuccess={() => onOpenChange(false)}
             department={department}
           />
-          <CurrentAssignments assignments={currentAssignments} />
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
