@@ -20,23 +20,25 @@ export const LoginForm = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Simplified login call without destructuring data immediately
+      const response = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      if (error) {
-        console.error("Login error:", error);
-        throw error;
+      if (response.error) {
+        console.error("Login error:", response.error);
+        throw response.error;
       }
 
-      if (data?.user) {
-        console.log("Login successful:", data.user);
+      // Only access data after confirming there's no error
+      if (response.data.user) {
+        console.log("Login successful:", response.data.user);
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
-        navigate("/");
+        // Let the auth state change handler handle navigation
       }
     } catch (error: any) {
       console.error("Error during login:", error);
