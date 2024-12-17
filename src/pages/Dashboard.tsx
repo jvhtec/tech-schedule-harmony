@@ -6,6 +6,7 @@ import { DepartmentColumn } from "@/components/dashboard/DepartmentColumn";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, format, startOfToday } from "date-fns";
+import { Department } from "@/types/department";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,12 +29,12 @@ const Dashboard = () => {
     },
   });
 
-  const getJobsByDepartment = (department: string) => {
+  const getJobsByDepartment = (department: Department) => {
     if (!jobs) return [];
     return jobs.filter((job) => job.departments.includes(department));
   };
 
-  const handleDepartmentClick = (department: string) => {
+  const handleDepartmentClick = (department: Department) => {
     navigate(`/${department === "sound" ? "" : department}`);
   };
 
