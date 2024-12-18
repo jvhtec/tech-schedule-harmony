@@ -26,6 +26,8 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
     "#D3E4FD", // Soft Blue
   ];
 
+  console.log("ColorPicker rendered with color:", color);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -35,31 +37,31 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
         >
           <div className="flex items-center gap-2">
             <div
-              className="h-4 w-4 rounded-full border"
+              className="h-4 w-4 rounded-full border border-input"
               style={{ backgroundColor: color }}
             />
-            <span>Selected Color: {color}</span>
+            <span className="truncate">Selected Color</span>
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64">
         <div className="grid grid-cols-5 gap-2">
           {colors.map((c) => (
-            <button
+            <Button
               key={c}
-              className="relative h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform hover:scale-110"
+              variant="ghost"
+              className="relative h-8 w-8 rounded-full p-0 hover:scale-110 transition-transform"
               style={{ backgroundColor: c }}
-              onClick={(e) => {
-                e.preventDefault();
-                console.log("Color clicked:", c);
+              onClick={() => {
+                console.log("Color selected:", c);
                 onChange(c);
               }}
-              type="button"
             >
               {color === c && (
-                <Check className="absolute inset-0 m-auto h-4 w-4 text-white" />
+                <Check className="h-4 w-4 text-white absolute inset-0 m-auto" />
               )}
-            </button>
+              <span className="sr-only">Select color {c}</span>
+            </Button>
           ))}
         </div>
       </PopoverContent>
