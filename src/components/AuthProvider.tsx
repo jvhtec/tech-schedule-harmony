@@ -40,12 +40,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    setIsLoading(true);
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setSession(null);
       setUserRole(null);
     } catch (error) {
       console.error("Error signing out:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -54,22 +58,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session check:", initialSession ? "Logged in" : "Not logged in");
+        console.log("Initial session:", initialSession);
         
-        if (mounted) {
-          if (initialSession?.user) {
-            const role = await fetchUserRole(initialSession.user.id);
-            setSession(initialSession);
-            setUserRole(role);
-          } else {
-            setSession(null);
-            setUserRole(null);
-          }
-          setIsLoading(false);
+        if (!mounted) return;
+
+        if (initialSession?.user) {
+          const role = await fetchUserRole(initialSession.user.id);
+          setSession(initialSession);
+          setUserRole(role);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
+      } finally {
         if (mounted) {
           setIsLoading(false);
         }
@@ -80,9 +82,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
-        console.log("Auth state changed:", event);
+        console.log("Auth state changed:", event, currentSession);
         
-        if (mounted) {
+        if (!mounted) return;
+
+        try {
           if (currentSession?.user) {
             const role = await fetchUserRole(currentSession.user.id);
             setSession(currentSession);
@@ -91,11 +95,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setSession(null);
             setUserRole(null);
           }
+        } catch (error) {
+          console.error("Error handling auth state change:", error);
         }
       }
     );
 
     return () => {
+      console.log("Cleaning up auth provider...");
       mounted = false;
       subscription.unsubscribe();
     };

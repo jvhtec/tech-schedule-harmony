@@ -25,15 +25,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!session) {
     console.log("No session, redirecting to auth");
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" />;
   }
 
   return <>{children}</>;
 };
 
 function App() {
-  console.log("App rendering");
-  
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
