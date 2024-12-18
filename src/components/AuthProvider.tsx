@@ -45,9 +45,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
+        console.log("User role fetched:", data?.role);
         if (mounted) {
-          console.log("User role fetched:", data?.role);
-          setUserRole(data?.role);
+          setUserRole(data?.role || null);
           setIsLoading(false);
         }
       } catch (error) {
@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!mounted) return;
 
       setSession(currentSession);
+      setIsLoading(true); // Set loading true when auth state changes
       
       if (currentSession?.user) {
         await fetchUserRole(currentSession.user.id);
