@@ -32,32 +32,14 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     residencia: "",
   });
 
-  const validatePassword = (password: string) => {
-    if (password.length < 6) {
-      return "Password must be at least 6 characters long";
-    }
-    return null;
-  };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate password before submission
-    const passwordError = validatePassword(formData.password);
-    if (passwordError) {
-      toast({
-        title: "Invalid Password",
-        description: passwordError,
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
       console.log("Starting signup process with email:", formData.email);
       
+      // First create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -79,6 +61,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
 
       console.log("Auth user created:", authData.user.id);
 
+      // Create technician profile
       const { error: techError } = await supabase.from("technicians").insert({
         id: authData.user.id,
         name: formData.name,
@@ -94,7 +77,21 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         throw techError;
       }
 
-      console.log("Technician profile created successfully");
+      // Update user profile with role
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          role: 'technician',
+          name: formData.name 
+        })
+        .eq('id', authData.user.id);
+
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
+
+      console.log("Signup completed successfully");
 
       toast({
         title: "Account created!",

@@ -21,35 +21,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchUserRole = async (userId: string) => {
+    try {
+      console.log("Fetching user role for:", userId);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user role:", error);
+        setUserRole(null);
+        return;
+      }
+
+      console.log("User role fetched:", data?.role);
+      setUserRole(data?.role || null);
+    } catch (error) {
+      console.error("Error in fetchUserRole:", error);
+      setUserRole(null);
+    }
+  };
+
   useEffect(() => {
     console.log("AuthProvider mounted");
 
-    const fetchUserRole = async (userId: string) => {
-      try {
-        console.log("Fetching user role for:", userId);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', userId)
-          .single();
-
-        if (error) {
-          console.error("Error fetching user role:", error);
-          setUserRole(null);
-          return;
-        }
-
-        console.log("User role fetched:", data?.role);
-        setUserRole(data?.role || null);
-      } catch (error) {
-        console.error("Error in fetchUserRole:", error);
-        setUserRole(null);
-      }
-    };
-
     const setupAuth = async () => {
       try {
-        // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
         
@@ -65,7 +64,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
       
@@ -80,10 +78,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsLoading(false);
     });
 
-    // Initialize auth
     setupAuth();
 
-    // Cleanup
     return () => {
       console.log("AuthProvider unmounting");
       subscription.unsubscribe();
