@@ -34,10 +34,19 @@ export const TechniciansList = ({ department }: TechniciansListProps) => {
       const { data, error } = await supabase
         .from("technicians")
         .select("*")
-        .eq("department", department);
-      if (error) throw error;
+        .eq("department", department)
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching technicians:", error);
+        throw error;
+      }
+      
+      console.log("Fetched technicians:", data);
       return data;
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
