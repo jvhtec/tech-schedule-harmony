@@ -1,19 +1,15 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { SignUpForm } from "@/components/auth/SignUpForm";
 import { UserInfo } from "@/components/UserInfo";
 import { useAuth } from "@/components/AuthProvider";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { session, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (session) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [session, navigate]);
+  const [showSignUp, setShowSignUp] = useState(false);
 
   if (isLoading) {
     return (
@@ -24,6 +20,7 @@ const Auth = () => {
   }
 
   if (session) {
+    navigate("/dashboard", { replace: true });
     return null;
   }
 
@@ -38,7 +35,21 @@ const Auth = () => {
           <p className="text-lg text-muted-foreground">to Sector-Pro Tech Area</p>
         </div>
         <Card className="p-6 w-full">
-          <LoginForm />
+          {showSignUp ? (
+            <SignUpForm onBack={() => setShowSignUp(false)} />
+          ) : (
+            <>
+              <LoginForm />
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setShowSignUp(true)}
+                  className="text-primary hover:underline"
+                >
+                  Don't have an account? Sign up
+                </button>
+              </div>
+            </>
+          )}
         </Card>
       </div>
     </div>

@@ -14,6 +14,7 @@ interface SignUpFormData {
   department: Department;
   dni: string;
   residencia: string;
+  role: "management" | "logistics" | "technician";
 }
 
 export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
@@ -28,6 +29,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     department: "sound",
     dni: "",
     residencia: "",
+    role: "technician",
   });
 
   const handleFormChange = (field: keyof SignUpFormData, value: string | Department) => {
@@ -81,7 +83,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          role: 'technician',
+          role: formData.role,
           name: formData.name 
         })
         .eq('id', authData.user.id);

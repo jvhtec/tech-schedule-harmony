@@ -11,6 +11,7 @@ interface SignUpFormData {
   department: Department;
   dni: string;
   residencia: string;
+  role: "management" | "logistics" | "technician";
 }
 
 interface SignUpFormFieldsProps {
@@ -50,6 +51,22 @@ export const SignUpFormFields = ({ formData, onChange }: SignUpFormFieldsProps) 
           onChange={(e) => onChange("name", e.target.value)}
           required
         />
+      </div>
+      <div>
+        <Label htmlFor="role">Role</Label>
+        <Select
+          value={formData.role}
+          onValueChange={(value: "management" | "logistics" | "technician") => onChange("role", value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="management">Management</SelectItem>
+            <SelectItem value="logistics">Logistics</SelectItem>
+            <SelectItem value="technician">Technician</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label htmlFor="phone">Phone Number</Label>
