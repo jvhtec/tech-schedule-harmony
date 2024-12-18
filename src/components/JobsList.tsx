@@ -18,6 +18,16 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
   // Filter out tour dates (jobs with tour_id) and show only main tour entries
   const filteredJobs = jobs?.filter((job) => !job.tour_id) || [];
 
+  const getBackgroundColor = (color: string | undefined) => {
+    if (!color) return "hsl(var(--secondary))";
+    // Convert hex to RGB and add transparency
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.15)`;
+  };
+
   return (
     <>
       <Card>
@@ -34,7 +44,8 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
                   key={job.id}
                   className="flex flex-col p-3 rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors"
                   style={{
-                    backgroundColor: job.color ? `${job.color}15` : "hsl(var(--secondary))",
+                    backgroundColor: getBackgroundColor(job.color),
+                    borderLeft: `4px solid ${job.color || 'hsl(var(--secondary))'}`,
                   }}
                 >
                   <div className="flex items-start justify-between gap-2">

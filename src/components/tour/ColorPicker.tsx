@@ -12,8 +12,9 @@ interface ColorPickerProps {
 }
 
 export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
+  // Predefined color palette for jobs
   const colors = [
-    "#8B5CF6", // Vivid Purple
+    "#9b87f5", // Primary Purple
     "#D946EF", // Magenta Pink
     "#F97316", // Bright Orange
     "#0EA5E9", // Ocean Blue
@@ -25,6 +26,8 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
     "#D3E4FD", // Soft Blue
   ];
 
+  console.log("Current selected color:", color);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -32,11 +35,13 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
           variant="outline"
           className="w-full justify-start text-left font-normal"
         >
-          <div
-            className="h-4 w-4 rounded-full mr-2"
-            style={{ backgroundColor: color }}
-          />
-          {color}
+          <div className="flex items-center gap-2">
+            <div
+              className="h-4 w-4 rounded-full"
+              style={{ backgroundColor: color }}
+            />
+            <span>Selected Color</span>
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64">
@@ -44,13 +49,16 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
           {colors.map((c) => (
             <button
               key={c}
-              className="h-8 w-8 rounded-full relative flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="relative h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform hover:scale-110"
               style={{ backgroundColor: c }}
-              onClick={() => onChange(c)}
+              onClick={() => {
+                console.log("Selecting color:", c);
+                onChange(c);
+              }}
               type="button"
             >
               {color === c && (
-                <Check className="h-4 w-4 text-white" />
+                <Check className="absolute inset-0 m-auto h-4 w-4 text-white" />
               )}
             </button>
           ))}
