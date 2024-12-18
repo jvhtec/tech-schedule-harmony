@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,11 +12,10 @@ import { useAuth } from "@/components/AuthProvider";
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isSignUp, setIsSignUp] = useState(false);
   const { session, isLoading } = useAuth();
 
   useEffect(() => {
-    console.log("Auth page - Current session:", session, "isLoading:", isLoading);
+    console.log("Auth page - session:", session, "isLoading:", isLoading);
     
     if (session) {
       console.log("User is already logged in, redirecting to dashboard");
@@ -47,22 +46,7 @@ const Auth = () => {
           <p className="text-lg text-muted-foreground">to Sector-Pro Tech Area</p>
         </div>
         <Card className="p-6 w-full">
-          {isSignUp ? (
-            <SignUpForm onBack={() => setIsSignUp(false)} />
-          ) : (
-            <div className="space-y-4">
-              <LoginForm />
-              <div className="text-center">
-                <Button
-                  variant="link"
-                  onClick={() => setIsSignUp(true)}
-                  className="text-sm"
-                >
-                  Don't have an account? Sign up
-                </Button>
-              </div>
-            </div>
-          )}
+          <LoginForm />
         </Card>
       </div>
     </div>

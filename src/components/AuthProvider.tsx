@@ -46,16 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const setupAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session check:", initialSession);
+        console.log("Initial session:", initialSession);
 
         if (mounted) {
           if (initialSession?.user) {
             const role = await fetchUserRole(initialSession.user.id);
             setSession(initialSession);
             setUserRole(role);
-          } else {
-            setSession(null);
-            setUserRole(null);
           }
           setIsLoading(false);
         }
@@ -67,11 +64,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    const subscription = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event, currentSession);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession);
 
-      if (mounted) {
-        try {
+        if (mounted) {
           if (currentSession?.user) {
             const role = await fetchUserRole(currentSession.user.id);
             setSession(currentSession);
@@ -80,18 +77,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setSession(null);
             setUserRole(null);
           }
-        } catch (error) {
-          console.error("Error in auth state change handler:", error);
         }
       }
-    });
+    );
 
     setupAuth();
 
     return () => {
       console.log("AuthProvider unmounting");
       mounted = false;
-      subscription.data.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
