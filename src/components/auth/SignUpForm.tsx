@@ -32,20 +32,38 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     residencia: "",
   });
 
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    return null;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password before submission
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      toast({
+        title: "Invalid Password",
+        description: passwordError,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       console.log("Starting signup process with email:", formData.email);
       
-      // First create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            name: formData.name, // Add user metadata
+            name: formData.name,
           },
         },
       });
@@ -61,7 +79,6 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
 
       console.log("Auth user created:", authData.user.id);
 
-      // Then create the technician profile
       const { error: techError } = await supabase.from("technicians").insert({
         id: authData.user.id,
         name: formData.name,
@@ -84,7 +101,6 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         description: "Please check your email to verify your account.",
       });
 
-      // Wait a moment before redirecting
       setTimeout(() => {
         navigate("/");
       }, 2000);
@@ -113,13 +129,14 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         />
       </div>
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Password (min. 6 characters)</Label>
         <Input
           id="password"
           type="password"
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
+          minLength={6}
         />
       </div>
       <div>

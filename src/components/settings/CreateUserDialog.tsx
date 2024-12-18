@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,11 +24,20 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
-  const { register, handleSubmit, reset, setValue } = useForm<FormData>();
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>();
+
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    return true;
+  };
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
+      console.log("Creating user with email:", data.email);
+      
       // Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -55,11 +64,11 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
         onOpenChange(false);
         reset();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating user:", error);
       toast({
         title: "Error",
-        description: "There was an error creating the user.",
+        description: error.message || "There was an error creating the user.",
         variant: "destructive",
       });
     } finally {
@@ -72,6 +81,9 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
+          <DialogDescription>
+            Create a new user account with the specified role.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -83,12 +95,20 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
             />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password (min. 6 characters)</Label>
             <Input
               id="password"
               type="password"
-              {...register("password", { required: true })}
+              {...register("password", { 
+                required: true,
+                validate: validatePassword
+              })}
             />
+            {errors.password && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.password.message}
+              </p>
+            )}
           </div>
           <div>
             <Label htmlFor="role">Role</Label>
