@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchUserRole = async (userId: string) => {
     try {
@@ -70,6 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } finally {
         if (mounted) {
           setIsLoading(false);
+          setInitialized(true);
         }
       }
     };
@@ -79,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
       
-      if (!mounted) return;
+      if (!mounted || !initialized) return;
 
       if (currentSession?.user) {
         const role = await fetchUserRole(currentSession.user.id);
@@ -99,7 +101,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ session, userRole, isLoading, signOut }}>
-      {children}
+      {initialized ? children : null}
     </AuthContext.Provider>
   );
 };
