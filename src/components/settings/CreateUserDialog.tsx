@@ -16,6 +16,7 @@ type FormData = {
   email: string;
   password: string;
   role: "management" | "logistics" | "technician";
+  name: string;
 };
 
 const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
@@ -29,27 +30,41 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
     try {
       console.log("Creating user with email:", data.email);
       
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: data.email,
         password: data.password,
+        email_confirm: true
       });
 
       if (authError) throw authError;
 
       if (authData.user) {
+        console.log("Auth user created, updating profile...");
+        
+        // Update the profile with role and name
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ role: data.role })
+          .update({ 
+            role: data.role,
+            name: data.name || data.email
+          })
           .eq("id", authData.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+          throw profileError;
+        }
+
+        console.log("Profile updated successfully");
 
         toast({
           title: "Success",
           description: "User created successfully.",
         });
         
-        queryClient.invalidateQueries({ queryKey: ['users'] });
+        // Invalidate users query to refresh the list
+        await queryClient.invalidateQueries({ queryKey: ['users'] });
         onOpenChange(false);
         reset();
       }

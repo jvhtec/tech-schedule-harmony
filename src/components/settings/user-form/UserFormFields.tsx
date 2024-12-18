@@ -7,6 +7,7 @@ interface FormData {
   email: string;
   password: string;
   role: "management" | "logistics" | "technician";
+  name: string;
 }
 
 interface UserFormFieldsProps {
@@ -28,6 +29,14 @@ export const UserFormFields = ({ register, setValue, errors }: UserFormFieldsPro
           id="email"
           type="email"
           {...register("email", { required: true })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="name">Name</Label>
+        <Input
+          id="name"
+          type="text"
+          {...register("name")}
         />
       </div>
       <div>
