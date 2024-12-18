@@ -46,6 +46,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         options: {
           data: {
             name: formData.name,
+            department: formData.department,
           },
         },
       });
