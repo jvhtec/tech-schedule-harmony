@@ -23,33 +23,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log("AuthProvider mounted");
-    
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       console.log("Initial session:", initialSession);
-      setSession(initialSession);
-      
-      if (initialSession?.user) {
-        fetchUserRole(initialSession.user.id);
-      } else {
-        setIsLoading(false);
+      if (mounted) {
+        setSession(initialSession);
+        if (initialSession?.user) {
+          fetchUserRole(initialSession.user.id);
+        } else {
+          setIsLoading(false);
+        }
       }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
-      setSession(currentSession);
-      
-      if (currentSession?.user) {
-        await fetchUserRole(currentSession.user.id);
-      } else {
-        setUserRole(null);
-        setIsLoading(false);
+      if (mounted) {
+        setSession(currentSession);
+        if (currentSession?.user) {
+          await fetchUserRole(currentSession.user.id);
+        } else {
+          setUserRole(null);
+          setIsLoading(false);
+        }
       }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -58,16 +62,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Fetching user role for:", userId);
       const { data, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
         .single();
 
       if (error) {
         console.error("Error fetching user role:", error);
         throw error;
       }
-      
+
       console.log("User role fetched:", data?.role);
       setUserRole(data?.role);
     } catch (error) {
