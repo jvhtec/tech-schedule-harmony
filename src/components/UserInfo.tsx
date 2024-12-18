@@ -1,27 +1,26 @@
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 export const UserInfo = () => {
-  const { session, userRole } = useAuth();
+  const { session, userRole, signOut } = useAuth();
   const { toast } = useToast();
 
   if (!session) return null;
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to sign out",
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully",
       });
     }
   };
