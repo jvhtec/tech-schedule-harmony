@@ -24,31 +24,56 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log("AuthProvider mounted");
     
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session check:", session);
-      setSession(session);
-      if (session) {
-        fetchUserRole(session.user.id);
-      } else {
-        setIsLoading(false);
-      }
-    });
+    let mounted = true;
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session);
-      setSession(session);
+    async function getInitialSession() {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        console.log("Initial session check:", initialSession, error);
+        
+        if (error) {
+          console.error("Error getting initial session:", error);
+          throw error;
+        }
+
+        if (mounted) {
+          if (initialSession) {
+            setSession(initialSession);
+            await fetchUserRole(initialSession.user.id);
+          } else {
+            setIsLoading(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error in getInitialSession:", error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state changed:", event, currentSession);
       
-      if (session) {
-        fetchUserRole(session.user.id);
-      } else {
-        setUserRole(null);
-        setIsLoading(false);
+      if (mounted) {
+        setSession(currentSession);
+        
+        if (currentSession) {
+          await fetchUserRole(currentSession.user.id);
+        } else {
+          setUserRole(null);
+          setIsLoading(false);
+        }
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserRole = async (userId: string) => {
@@ -60,12 +85,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .eq("id", userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching user role:", error);
+        throw error;
+      }
       
       console.log("User role fetched:", data?.role);
       setUserRole(data?.role);
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error("Error in fetchUserRole:", error);
       setUserRole(null);
     } finally {
       setIsLoading(false);
