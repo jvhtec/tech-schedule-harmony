@@ -54,12 +54,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (!mounted) return;
 
-        setSession(initialSession);
-        
         if (initialSession?.user) {
           const role = await fetchUserRole(initialSession.user.id);
           if (mounted) {
+            setSession(initialSession);
             setUserRole(role);
+          }
+        } else {
+          if (mounted) {
+            setSession(null);
+            setUserRole(null);
           }
         }
       } catch (error) {
@@ -76,19 +80,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (!mounted) return;
 
-      setSession(currentSession);
-      
       if (currentSession?.user) {
         const role = await fetchUserRole(currentSession.user.id);
         if (mounted) {
+          setSession(currentSession);
           setUserRole(role);
         }
       } else {
-        setUserRole(null);
-      }
-      
-      if (mounted) {
-        setIsLoading(false);
+        if (mounted) {
+          setSession(null);
+          setUserRole(null);
+        }
       }
     });
 
