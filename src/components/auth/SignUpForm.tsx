@@ -37,36 +37,62 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     setLoading(true);
 
     try {
+      console.log("Starting signup process with email:", formData.email);
+      
+      // First create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            name: formData.name, // Add user metadata
+          },
+        },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { error: techError } = await supabase.from("technicians").insert({
-          id: authData.user.id,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          department: formData.department,
-          dni: formData.dni,
-          residencia: formData.residencia,
-        });
-
-        if (techError) throw techError;
-
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+      if (authError) {
+        console.error("Auth error:", authError);
+        throw authError;
       }
-    } catch (error) {
+
+      if (!authData.user) {
+        throw new Error("No user data returned from signup");
+      }
+
+      console.log("Auth user created:", authData.user.id);
+
+      // Then create the technician profile
+      const { error: techError } = await supabase.from("technicians").insert({
+        id: authData.user.id,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        dni: formData.dni,
+        residencia: formData.residencia,
+      });
+
+      if (techError) {
+        console.error("Technician creation error:", techError);
+        throw techError;
+      }
+
+      console.log("Technician profile created successfully");
+
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+
+      // Wait a moment before redirecting
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (error: any) {
       console.error("Error during signup:", error);
       toast({
         title: "Error",
-        description: "There was an error creating your account. Please try again.",
+        description: error.message || "There was an error creating your account. Please try again.",
         variant: "destructive",
       });
     } finally {
