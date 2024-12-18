@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
-        
+
         if (!mounted) return;
 
         if (initialSession?.user) {
@@ -77,20 +77,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
-      
+
       if (!mounted) return;
 
-      if (currentSession?.user) {
-        const role = await fetchUserRole(currentSession.user.id);
-        if (mounted) {
-          setSession(currentSession);
-          setUserRole(role);
+      try {
+        if (currentSession?.user) {
+          const role = await fetchUserRole(currentSession.user.id);
+          if (mounted) {
+            setSession(currentSession);
+            setUserRole(role);
+          }
+        } else {
+          if (mounted) {
+            setSession(null);
+            setUserRole(null);
+          }
         }
-      } else {
-        if (mounted) {
-          setSession(null);
-          setUserRole(null);
-        }
+      } catch (error) {
+        console.error("Error in auth state change handler:", error);
       }
     });
 
