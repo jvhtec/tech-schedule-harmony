@@ -7,40 +7,22 @@ import { Button } from "@/components/ui/button";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { UserInfo } from "@/components/UserInfo";
+import { useAuth } from "@/components/AuthProvider";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { session, isLoading } = useAuth();
 
   useEffect(() => {
-    console.log("Auth page mounted");
+    console.log("Auth page - Current session:", session, "isLoading:", isLoading);
     
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Auth page - Initial session check:", session);
-      if (session) {
-        console.log("User is already logged in, redirecting to dashboard");
-        navigate("/dashboard", { replace: true });
-      }
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session);
-      if (event === "SIGNED_IN") {
-        toast({
-          title: "Welcome!",
-          description: "You have successfully signed in.",
-        });
-        navigate("/dashboard", { replace: true });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+    if (session) {
+      console.log("User is already logged in, redirecting to dashboard");
+      navigate("/dashboard", { replace: true });
+    }
+  }, [session, navigate]);
 
   if (isLoading) {
     return (
@@ -48,6 +30,10 @@ const Auth = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
+  }
+
+  if (session) {
+    return null;
   }
 
   return (

@@ -21,80 +21,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string) => {
-    try {
-      console.log("Fetching user role for:", userId);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
+  useEffect(() => {
+    console.log("AuthProvider mounted");
+    let mounted = true;
 
-      if (error) {
+    const fetchUserRole = async (userId: string) => {
+      try {
+        console.log("Fetching user role for:", userId);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .single();
+
+        if (error) throw error;
+        console.log("User role fetched:", data?.role);
+        return data?.role || null;
+      } catch (error) {
         console.error("Error fetching user role:", error);
         return null;
       }
-
-      console.log("User role fetched:", data?.role);
-      return data?.role || null;
-    } catch (error) {
-      console.error("Error in fetchUserRole:", error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-    console.log("AuthProvider mounted");
+    };
 
     const setupAuth = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("Initial session:", initialSession);
+        console.log("Initial session check:", initialSession);
 
-        if (!mounted) return;
-
-        if (initialSession?.user) {
-          const role = await fetchUserRole(initialSession.user.id);
-          if (mounted) {
+        if (mounted) {
+          if (initialSession?.user) {
+            const role = await fetchUserRole(initialSession.user.id);
             setSession(initialSession);
             setUserRole(role);
-          }
-        } else {
-          if (mounted) {
+          } else {
             setSession(null);
             setUserRole(null);
           }
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error in setupAuth:", error);
-      } finally {
         if (mounted) {
           setIsLoading(false);
         }
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const subscription = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
 
-      if (!mounted) return;
-
-      try {
-        if (currentSession?.user) {
-          const role = await fetchUserRole(currentSession.user.id);
-          if (mounted) {
+      if (mounted) {
+        try {
+          if (currentSession?.user) {
+            const role = await fetchUserRole(currentSession.user.id);
             setSession(currentSession);
             setUserRole(role);
-          }
-        } else {
-          if (mounted) {
+          } else {
             setSession(null);
             setUserRole(null);
           }
+        } catch (error) {
+          console.error("Error in auth state change handler:", error);
         }
-      } catch (error) {
-        console.error("Error in auth state change handler:", error);
       }
     });
 
@@ -103,11 +91,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       console.log("AuthProvider unmounting");
       mounted = false;
-      subscription.unsubscribe();
+      subscription.data.subscription.unsubscribe();
     };
   }, []);
 
-  console.log("AuthProvider rendering with:", { session, userRole, isLoading });
+  console.log("AuthProvider state:", { session, userRole, isLoading });
 
   return (
     <AuthContext.Provider value={{ session, userRole, isLoading }}>
