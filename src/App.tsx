@@ -8,8 +8,6 @@ import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import "./App.css";
 
-console.log("App component initializing");
-
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

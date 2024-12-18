@@ -1,17 +1,13 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { SignUpForm } from "@/components/auth/SignUpForm";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { UserInfo } from "@/components/UserInfo";
 import { useAuth } from "@/components/AuthProvider";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { session, isLoading } = useAuth();
 
   useEffect(() => {
