@@ -26,6 +26,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let mounted = true;
 
     const fetchUserRole = async (userId: string) => {
+      if (!mounted) return;
+      
       try {
         console.log("Fetching user role for:", userId);
         const { data, error } = await supabase
@@ -36,7 +38,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (error) {
           console.error("Error fetching user role:", error);
-          throw error;
+          if (mounted) {
+            setUserRole(null);
+            setIsLoading(false);
+          }
+          return;
         }
 
         if (mounted) {
@@ -53,8 +59,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Get initial session
+    // Initialize auth state
     const initializeAuth = async () => {
+      if (!mounted) return;
+
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
@@ -70,25 +78,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (error) {
         console.error("Error in initializeAuth:", error);
         if (mounted) {
+          setSession(null);
+          setUserRole(null);
           setIsLoading(false);
         }
       }
     };
 
+    // Start initialization
     initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
       
-      if (mounted) {
-        setSession(currentSession);
-        if (currentSession?.user) {
-          await fetchUserRole(currentSession.user.id);
-        } else {
-          setUserRole(null);
-          setIsLoading(false);
-        }
+      if (!mounted) return;
+
+      setSession(currentSession);
+      
+      if (currentSession?.user) {
+        await fetchUserRole(currentSession.user.id);
+      } else {
+        setUserRole(null);
+        setIsLoading(false);
       }
     });
 
