@@ -32,6 +32,13 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     setDates([...dates, { start: "", end: "", location: "" }]);
   };
 
+  const handleRemoveDate = (index: number) => {
+    if (dates.length > 1) {
+      const newDates = dates.filter((_, i) => i !== index);
+      setDates(newDates);
+    }
+  };
+
   const handleDateChange = (
     index: number,
     field: "start" | "end" | "location",
@@ -140,6 +147,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
             dates={dates}
             onDateChange={handleDateChange}
             handleAddDate={handleAddDate}
+            handleRemoveDate={handleRemoveDate}
             departments={departments}
             handleDepartmentChange={handleDepartmentChange}
             currentDepartment={currentDepartment}

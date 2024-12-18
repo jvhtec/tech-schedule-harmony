@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 
 interface TourFormFieldsProps {
   title: string;
@@ -18,6 +18,7 @@ interface TourFormFieldsProps {
   dates: { start: string; end: string; location: string }[];
   onDateChange: (index: number, field: "start" | "end" | "location", value: string) => void;
   handleAddDate: () => void;
+  handleRemoveDate: (index: number) => void;
   departments: Department[];
   handleDepartmentChange: (dept: Department, checked: boolean) => void;
   currentDepartment: Department;
@@ -32,6 +33,7 @@ export const TourFormFields = ({
   dates,
   onDateChange,
   handleAddDate,
+  handleRemoveDate,
   departments,
   handleDepartmentChange,
   currentDepartment,
@@ -63,7 +65,18 @@ export const TourFormFields = ({
       <div className="space-y-2">
         <Label>Tour Dates</Label>
         {dates.map((date, index) => (
-          <div key={index} className="space-y-2">
+          <div key={index} className="space-y-2 border p-4 rounded-lg relative">
+            {dates.length > 1 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => handleRemoveDate(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-2">
                 <Label>Start Date</Label>
@@ -84,9 +97,12 @@ export const TourFormFields = ({
                     <Calendar
                       mode="single"
                       selected={date.start ? new Date(date.start) : undefined}
-                      onSelect={(newDate) => 
-                        onDateChange(index, "start", newDate ? newDate.toISOString() : '')
-                      }
+                      onSelect={(newDate) => {
+                        if (newDate) {
+                          const dateStr = newDate.toISOString();
+                          onDateChange(index, "start", dateStr);
+                        }
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -112,9 +128,12 @@ export const TourFormFields = ({
                     <Calendar
                       mode="single"
                       selected={date.end ? new Date(date.end) : undefined}
-                      onSelect={(newDate) => 
-                        onDateChange(index, "end", newDate ? newDate.toISOString() : '')
-                      }
+                      onSelect={(newDate) => {
+                        if (newDate) {
+                          const dateStr = newDate.toISOString();
+                          onDateChange(index, "end", dateStr);
+                        }
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
