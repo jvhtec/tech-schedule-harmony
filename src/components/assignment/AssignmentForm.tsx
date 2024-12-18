@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Department } from "@/types/job";
 import { Technician } from "@/types/technician";
+import { useQuery } from "@tanstack/react-query";
+import { CurrentAssignments } from "./CurrentAssignments";
 
 const DEPARTMENT_ROLES = {
   sound: [
@@ -53,6 +55,27 @@ export const AssignmentForm = ({
   const [selectedRole, setSelectedRole] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: assignments } = useQuery({
+    queryKey: ["job-assignments", jobId],
+    queryFn: async () => {
+      console.log("Fetching assignments for job:", jobId);
+      const { data, error } = await supabase
+        .from("job_assignments")
+        .select(`
+          *,
+          technicians (
+            name,
+            email,
+            department
+          )
+        `)
+        .eq("job_id", jobId);
+      if (error) throw error;
+      console.log("Assignments data:", data);
+      return data;
+    },
+  });
 
   const handleAssign = async () => {
     if (!selectedTechnician || !selectedRole) {
@@ -95,6 +118,8 @@ export const AssignmentForm = ({
 
   return (
     <div className="space-y-4">
+      <CurrentAssignments assignments={assignments} jobId={jobId} />
+
       <div className="space-y-2">
         <Label>Role</Label>
         <Select
