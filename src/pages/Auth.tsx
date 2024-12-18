@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { UserInfo } from "@/components/UserInfo";
@@ -11,10 +10,7 @@ const Auth = () => {
   const { session, isLoading } = useAuth();
 
   useEffect(() => {
-    console.log("Auth page - session:", session, "isLoading:", isLoading);
-    
     if (session) {
-      console.log("User is already logged in, redirecting to dashboard");
       navigate("/dashboard", { replace: true });
     }
   }, [session, navigate]);
