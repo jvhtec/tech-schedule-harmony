@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { ColorPicker } from "./tour/ColorPicker";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 interface CreateJobDialogProps {
   open: boolean;
@@ -135,7 +135,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
 
           <div className="space-y-2">
             <Label>Color</Label>
-            <ColorPicker color={color} onChange={setColor} />
+            <ColorPicker value={color} onChange={setColor} />
           </div>
 
           <div className="space-y-2">

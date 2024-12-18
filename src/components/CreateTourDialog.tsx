@@ -212,7 +212,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
           />
           <div className="space-y-2">
             <Label>Color</Label>
-            <ColorPicker color={color} onChange={setColor} />
+            <ColorPicker value={color} onChange={setColor} />
           </div>
           <Button type="submit" className="w-full">
             Create Tour
