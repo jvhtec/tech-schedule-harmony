@@ -26,8 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     let mounted = true;
 
     const fetchUserRole = async (userId: string) => {
-      if (!mounted) return;
-      
       try {
         console.log("Fetching user role for:", userId);
         const { data, error } = await supabase
@@ -61,6 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
+        console.log("Initializing auth...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
         
@@ -71,6 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (initialSession?.user) {
           await fetchUserRole(initialSession.user.id);
         } else {
+          console.log("No initial session, setting loading to false");
           setIsLoading(false);
         }
       } catch (error) {
@@ -95,12 +95,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (currentSession?.user) {
         await fetchUserRole(currentSession.user.id);
       } else {
+        console.log("No session in auth change, setting loading to false");
         setUserRole(null);
         setIsLoading(false);
       }
     });
 
     return () => {
+      console.log("AuthProvider unmounting");
       mounted = false;
       subscription.unsubscribe();
     };
