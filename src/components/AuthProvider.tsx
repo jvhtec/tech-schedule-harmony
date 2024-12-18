@@ -32,15 +32,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error("Error fetching user role:", error);
-        setUserRole(null);
-        return;
+        return null;
       }
 
       console.log("User role fetched:", data?.role);
-      setUserRole(data?.role || null);
+      return data?.role || null;
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
-      setUserRole(null);
+      return null;
     }
   };
 
@@ -56,8 +55,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!mounted) return;
 
         setSession(initialSession);
+        
         if (initialSession?.user) {
-          await fetchUserRole(initialSession.user.id);
+          const role = await fetchUserRole(initialSession.user.id);
+          if (mounted) {
+            setUserRole(role);
+          }
         }
       } catch (error) {
         console.error("Error in setupAuth:", error);
@@ -76,12 +79,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(currentSession);
       
       if (currentSession?.user) {
-        await fetchUserRole(currentSession.user.id);
+        const role = await fetchUserRole(currentSession.user.id);
+        if (mounted) {
+          setUserRole(role);
+        }
       } else {
         setUserRole(null);
       }
       
-      setIsLoading(false);
+      if (mounted) {
+        setIsLoading(false);
+      }
     });
 
     setupAuth();
