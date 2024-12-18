@@ -31,29 +31,59 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const today = startOfToday();
   const [timeSpan, setTimeSpan] = useState(() => {
-    // Try to get the saved time span from localStorage, fallback to default
     return localStorage.getItem("preferredTimeSpan") || DEFAULT_TIME_SPAN;
   });
   const [selectedJob, setSelectedJob] = useState<any>(null);
-  const { userRole } = useAuth();
+  const { userRole, session } = useAuth();
 
-  // Save time span preference to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("preferredTimeSpan", timeSpan);
   }, [timeSpan]);
 
-  const { data: jobs, isLoading } = useQuery({
-    queryKey: ['jobs', timeSpan],
+  // First fetch assignments if user is a technician
+  const { data: userAssignments, isLoading: isLoadingAssignments } = useQuery({
+    queryKey: ['user-assignments', session?.user?.id],
+    queryFn: async () => {
+      if (userRole !== 'technician' || !session?.user?.id) return null;
+      
+      console.log("Fetching user assignments...");
+      const { data, error } = await supabase
+        .from('job_assignments')
+        .select('job_id')
+        .eq('technician_id', session.user.id);
+
+      if (error) {
+        console.error("Error fetching assignments:", error);
+        throw error;
+      }
+
+      console.log("Fetched assignments:", data);
+      return data;
+    },
+    enabled: userRole === 'technician' && !!session?.user?.id,
+  });
+
+  // Then fetch jobs based on assignments if user is a technician
+  const { data: jobs, isLoading: isLoadingJobs } = useQuery({
+    queryKey: ['jobs', timeSpan, userAssignments],
     queryFn: async () => {
       console.log("Fetching jobs...");
       const endDate = addDays(today, TIME_SPANS[timeSpan as keyof typeof TIME_SPANS].days);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('jobs')
         .select('*')
         .gte('start_time', startOfDay(today).toISOString())
         .lte('start_time', endOfDay(endDate).toISOString())
         .order('start_time', { ascending: true });
+
+      // If user is a technician, only fetch assigned jobs
+      if (userRole === 'technician' && userAssignments) {
+        const jobIds = userAssignments.map(assignment => assignment.job_id);
+        query = query.in('id', jobIds);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching jobs:", error);
@@ -63,7 +93,10 @@ const Dashboard = () => {
       console.log("Fetched jobs:", data);
       return data;
     },
+    enabled: userRole === 'management' || !!userAssignments,
   });
+
+  const isLoading = isLoadingJobs || isLoadingAssignments;
 
   const getJobsByDepartment = (department: Department) => {
     if (!jobs) return [];
@@ -73,7 +106,9 @@ const Dashboard = () => {
   };
 
   const handleDepartmentClick = (department: Department) => {
-    navigate(`/${department === "sound" ? "" : department}`);
+    if (userRole === 'management') {
+      navigate(`/${department === "sound" ? "" : department}`);
+    }
   };
 
   if (isLoading) {
@@ -138,7 +173,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {selectedJob && (
+      {selectedJob && userRole === 'management' && (
         <AssignTechnicianDialog
           open={!!selectedJob}
           onOpenChange={(open) => !open && setSelectedJob(null)}
