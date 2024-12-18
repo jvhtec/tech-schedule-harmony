@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import CreateUserDialog from "@/components/settings/CreateUserDialog";
@@ -10,6 +9,7 @@ import EditUserDialog from "@/components/settings/EditUserDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { UserInfo } from "@/components/UserInfo";
+import { UserManagementCard } from "@/components/settings/UserManagementCard";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -88,48 +88,12 @@ const Settings = () => {
       </div>
 
       <div className="grid gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>User Management</CardTitle>
-            <Button onClick={() => setCreateUserOpen(true)}>
-              Add User
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Create and manage users with management or logistics privileges.
-            </p>
-            
-            {isLoading ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {users?.map((user) => (
-                  <div 
-                    key={user.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-muted-foreground capitalize">
-                        Role: {user.role}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingUser(user)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <UserManagementCard
+          users={users}
+          isLoading={isLoading}
+          onAddUser={() => setCreateUserOpen(true)}
+          onEditUser={setEditingUser}
+        />
       </div>
 
       <CreateUserDialog 

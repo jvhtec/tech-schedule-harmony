@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { EditUserFields } from "./edit-user/EditUserFields";
+import { EditUserActions } from "./edit-user/EditUserActions";
 
 interface EditUserDialogProps {
   open: boolean;
@@ -107,42 +105,16 @@ const EditUserDialog = ({ open, onOpenChange, user }: EditUserDialogProps) => {
           <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              {...register("name", { required: true })}
-            />
-          </div>
-          <div>
-            <Label htmlFor="role">Role</Label>
-            <Select 
-              onValueChange={(value) => setValue("role", value as "management" | "logistics" | "technician")}
-              defaultValue={user?.role}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="management">Management</SelectItem>
-                <SelectItem value="logistics">Logistics</SelectItem>
-                <SelectItem value="technician">Technician</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex justify-between gap-4">
-            <Button type="button" variant="destructive" onClick={handleDelete}>
-              Delete User
-            </Button>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </div>
+          <EditUserFields 
+            register={register}
+            defaultRole={user?.role}
+            onRoleChange={(value) => setValue("role", value)}
+          />
+          <EditUserActions 
+            onDelete={handleDelete}
+            onCancel={() => onOpenChange(false)}
+            loading={loading}
+          />
         </form>
       </DialogContent>
     </Dialog>
