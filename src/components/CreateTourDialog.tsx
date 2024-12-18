@@ -58,19 +58,72 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     }
   };
 
+  const validateDates = () => {
+    return dates.every(date => {
+      if (!date.start || !date.end) {
+        toast({
+          title: "Error",
+          description: "Please select both start and end dates for all tour dates",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      const startDate = new Date(date.start);
+      const endDate = new Date(date.end);
+      
+      if (endDate < startDate) {
+        toast({
+          title: "Error",
+          description: "End date cannot be before start date",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!title.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a title for the tour",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateDates()) {
+      return;
+    }
+
     console.log("Creating new tour:", { title, dates, color, departments });
 
     try {
+      // Filter out any dates that don't have both start and end dates
+      const validDates = dates.filter(date => date.start && date.end);
+      
+      if (validDates.length === 0) {
+        toast({
+          title: "Error",
+          description: "At least one valid date range is required",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { data: tourData, error: tourError } = await supabase
         .from("jobs")
         .insert({
           title,
           description,
-          start_time: dates[0].start,
-          end_time: dates[dates.length - 1].end,
-          location: dates[0].location,
+          start_time: validDates[0].start,
+          end_time: validDates[validDates.length - 1].end,
+          location: validDates[0].location,
           job_type: "tour" as const,
           color,
           departments,
@@ -80,7 +133,8 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
 
       if (tourError) throw tourError;
 
-      const unique_locations = [...new Set(dates.map((d) => d.location))];
+      // Insert locations if they don't exist
+      const unique_locations = [...new Set(validDates.map((d) => d.location))];
       for (const location of unique_locations) {
         if (location) {
           await supabase
@@ -91,7 +145,8 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
         }
       }
 
-      const dateEntries = dates.map((date) => ({
+      // Create individual tour dates
+      const dateEntries = validDates.map((date) => ({
         title: `${title} (Tour Date)`,
         description,
         start_time: date.start,
