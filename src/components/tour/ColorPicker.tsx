@@ -7,11 +7,11 @@ import {
 import { Check } from "lucide-react";
 
 interface ColorPickerProps {
-  color: string;
+  value: string;
   onChange: (color: string) => void;
 }
 
-export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
+export const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
   // Predefined color palette for jobs
   const colors = [
     "#9b87f5", // Primary Purple
@@ -26,7 +26,7 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
     "#D3E4FD", // Soft Blue
   ];
 
-  console.log("ColorPicker rendered with color:", color);
+  console.log("ColorPicker rendered with value:", value);
 
   return (
     <Popover>
@@ -38,7 +38,7 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
           <div className="flex items-center gap-2">
             <div
               className="h-4 w-4 rounded-full border border-input"
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: value }}
             />
             <span className="truncate">Selected Color</span>
           </div>
@@ -46,21 +46,21 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
       </PopoverTrigger>
       <PopoverContent className="w-64">
         <div className="grid grid-cols-5 gap-2">
-          {colors.map((c) => (
+          {colors.map((color) => (
             <Button
-              key={c}
+              key={color}
               variant="ghost"
               className="relative h-8 w-8 rounded-full p-0 hover:scale-110 transition-transform"
-              style={{ backgroundColor: c }}
+              style={{ backgroundColor: color }}
               onClick={() => {
-                console.log("Color selected:", c);
-                onChange(c);
+                console.log("Color selected:", color);
+                onChange(color);
               }}
             >
-              {color === c && (
+              {value === color && (
                 <Check className="h-4 w-4 text-white absolute inset-0 m-auto" />
               )}
-              <span className="sr-only">Select color {c}</span>
+              <span className="sr-only">Select color {color}</span>
             </Button>
           ))}
         </div>
