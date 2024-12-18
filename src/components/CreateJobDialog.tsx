@@ -30,11 +30,6 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
 
   const availableDepartments: Department[] = ["sound", "lights", "video"];
 
-  const handleColorChange = (newColor: string) => {
-    console.log("Setting new color:", newColor);
-    setColor(newColor);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Creating job with color:", color);
@@ -140,7 +135,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
 
           <div className="space-y-2">
             <Label>Color</Label>
-            <ColorPicker color={color} onChange={handleColorChange} />
+            <ColorPicker color={color} onChange={setColor} />
           </div>
 
           <div className="space-y-2">

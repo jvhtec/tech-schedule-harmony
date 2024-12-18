@@ -26,11 +26,6 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
     "#D3E4FD", // Soft Blue
   ];
 
-  const handleColorSelect = (newColor: string) => {
-    console.log("Selecting color:", newColor);
-    onChange(newColor);
-  };
-
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -40,7 +35,7 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
         >
           <div className="flex items-center gap-2">
             <div
-              className="h-4 w-4 rounded-full"
+              className="h-4 w-4 rounded-full border"
               style={{ backgroundColor: color }}
             />
             <span>Selected Color: {color}</span>
@@ -54,7 +49,11 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
               key={c}
               className="relative h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 transition-transform hover:scale-110"
               style={{ backgroundColor: c }}
-              onClick={() => handleColorSelect(c)}
+              onClick={(e) => {
+                e.preventDefault();
+                console.log("Color clicked:", c);
+                onChange(c);
+              }}
               type="button"
             >
               {color === c && (
