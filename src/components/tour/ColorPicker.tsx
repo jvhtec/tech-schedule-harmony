@@ -1,9 +1,9 @@
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
 
 interface ColorPickerProps {
   color: string;
@@ -11,6 +11,19 @@ interface ColorPickerProps {
 }
 
 export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
+  const colors = [
+    "#8B5CF6", // Vivid Purple
+    "#D946EF", // Magenta Pink
+    "#F97316", // Bright Orange
+    "#0EA5E9", // Ocean Blue
+    "#6E59A5", // Tertiary Purple
+    "#FEC6A1", // Soft Orange
+    "#E5DEFF", // Soft Purple
+    "#FFDEE2", // Soft Pink
+    "#FDE1D3", // Soft Peach
+    "#D3E4FD", // Soft Blue
+  ];
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -27,22 +40,11 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
       </PopoverTrigger>
       <PopoverContent className="w-64">
         <div className="grid grid-cols-5 gap-2">
-          {[
-            "#8B5CF6",
-            "#D946EF",
-            "#F97316",
-            "#0EA5E9",
-            "#6E59A5",
-            "#FEC6A1",
-            "#E5DEFF",
-            "#FFDEE2",
-            "#FDE1D3",
-            "#D3E4FD",
-          ].map((c) => (
+          {colors.map((c) => (
             <button
               key={c}
               className={`h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                color === c ? "ring-2 ring-offset-2" : ""
+                color === c ? "ring-2 ring-offset-2 ring-primary" : ""
               }`}
               style={{ backgroundColor: c }}
               onClick={() => onChange(c)}

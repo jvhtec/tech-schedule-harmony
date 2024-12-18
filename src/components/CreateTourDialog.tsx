@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { TourDateInput } from "./tour/TourDateInput";
 import { ColorPicker } from "./tour/ColorPicker";
 import { useLocations } from "@/hooks/useLocations";
 import { Department } from "@/types/department";
+import { TourFormFields } from "./tour/TourFormFields";
 
 interface CreateTourDialogProps {
   open: boolean;
@@ -58,7 +55,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     console.log("Creating new tour:", { title, dates, color, departments });
 
     try {
-      // First, create the main tour record
       const { data: tourData, error: tourError } = await supabase
         .from("jobs")
         .insert({
@@ -76,7 +72,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
 
       if (tourError) throw tourError;
 
-      // Store unique locations
       const unique_locations = [...new Set(dates.map((d) => d.location))];
       for (const location of unique_locations) {
         if (location) {
@@ -88,7 +83,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
         }
       }
 
-      // Create individual date entries linked to the tour
       const dateEntries = dates.map((date) => ({
         title: `${title} (Tour Date)`,
         description,
@@ -131,8 +125,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     }
   };
 
-  const availableDepartments: Department[] = ["sound", "lights", "video"];
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -140,66 +132,19 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
           <DialogTitle>Create New Tour</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Tour Dates</Label>
-            {dates.map((date, index) => (
-              <TourDateInput
-                key={index}
-                index={index}
-                date={date}
-                onDateChange={handleDateChange}
-                locations={locations}
-              />
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleAddDate}
-            >
-              Add Date
-            </Button>
-          </div>
-          <div className="space-y-2">
-            <Label>Departments</Label>
-            <div className="flex flex-col gap-2">
-              {availableDepartments.map((dept) => (
-                <div key={dept} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`dept-${dept}`}
-                    checked={departments.includes(dept)}
-                    onCheckedChange={(checked) => 
-                      handleDepartmentChange(dept, checked as boolean)
-                    }
-                    disabled={dept === currentDepartment}
-                  />
-                  <label
-                    htmlFor={`dept-${dept}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {dept.charAt(0).toUpperCase() + dept.slice(1)}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TourFormFields
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            dates={dates}
+            onDateChange={handleDateChange}
+            handleAddDate={handleAddDate}
+            departments={departments}
+            handleDepartmentChange={handleDepartmentChange}
+            currentDepartment={currentDepartment}
+            locations={locations}
+          />
           <div className="space-y-2">
             <Label>Color</Label>
             <ColorPicker color={color} onChange={setColor} />
