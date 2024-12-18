@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log("AuthProvider mounted");
-    let mounted = true;
 
     const fetchUserRole = async (userId: string) => {
       try {
@@ -36,74 +35,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (error) {
           console.error("Error fetching user role:", error);
-          if (mounted) {
-            setUserRole(null);
-            setIsLoading(false);
-          }
+          setUserRole(null);
           return;
         }
 
         console.log("User role fetched:", data?.role);
-        if (mounted) {
-          setUserRole(data?.role || null);
-          setIsLoading(false);
-        }
+        setUserRole(data?.role || null);
       } catch (error) {
         console.error("Error in fetchUserRole:", error);
-        if (mounted) {
-          setUserRole(null);
-          setIsLoading(false);
-        }
+        setUserRole(null);
       }
     };
 
-    const initializeAuth = async () => {
+    const setupAuth = async () => {
       try {
-        console.log("Initializing auth...");
+        // Get initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
         
-        if (!mounted) return;
-
         setSession(initialSession);
-        
+
         if (initialSession?.user) {
           await fetchUserRole(initialSession.user.id);
-        } else {
-          console.log("No initial session, setting loading to false");
-          setIsLoading(false);
         }
       } catch (error) {
-        console.error("Error in initializeAuth:", error);
-        if (mounted) {
-          setSession(null);
-          setUserRole(null);
-          setIsLoading(false);
-        }
+        console.error("Error in setupAuth:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    initializeAuth();
-
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
       
-      if (!mounted) return;
-
       setSession(currentSession);
       
       if (currentSession?.user) {
         await fetchUserRole(currentSession.user.id);
       } else {
-        console.log("No session in auth change, setting loading to false");
         setUserRole(null);
-        setIsLoading(false);
       }
+      
+      setIsLoading(false);
     });
 
+    // Initialize auth
+    setupAuth();
+
+    // Cleanup
     return () => {
       console.log("AuthProvider unmounting");
-      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
