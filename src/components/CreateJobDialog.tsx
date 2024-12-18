@@ -1,4 +1,4 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Department } from "@/types/department";
@@ -23,12 +23,17 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
-  const [color, setColor] = useState("#8B5CF6");
+  const [color, setColor] = useState("#9b87f5");
   const [selectedDepartments, setSelectedDepartments] = useState<Department[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const availableDepartments: Department[] = ["sound", "lights", "video"];
+
+  const handleColorChange = (newColor: string) => {
+    console.log("Setting new color:", newColor);
+    setColor(newColor);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +69,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
       setStartTime("");
       setEndTime("");
       setLocation("");
-      setColor("#8B5CF6");
+      setColor("#9b87f5");
       setSelectedDepartments([currentDepartment]);
     } catch (error) {
       console.error("Error creating job:", error);
@@ -79,6 +84,9 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Job</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
@@ -132,7 +140,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
 
           <div className="space-y-2">
             <Label>Color</Label>
-            <ColorPicker color={color} onChange={setColor} />
+            <ColorPicker color={color} onChange={handleColorChange} />
           </div>
 
           <div className="space-y-2">
