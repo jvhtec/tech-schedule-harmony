@@ -40,7 +40,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
-    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -48,8 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUserRole(null);
     } catch (error) {
       console.error("Error signing out:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -58,10 +55,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const initializeAuth = async () => {
       try {
-        console.log("Initializing auth...");
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
-        
+
         if (!mounted) return;
 
         if (initialSession?.user) {
@@ -80,29 +76,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event, currentSession);
-        
-        if (!mounted) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state changed:", event, currentSession);
+      
+      if (!mounted) return;
 
-        try {
-          if (currentSession?.user) {
-            const role = await fetchUserRole(currentSession.user.id);
-            setSession(currentSession);
-            setUserRole(role);
-          } else {
-            setSession(null);
-            setUserRole(null);
-          }
-        } catch (error) {
-          console.error("Error handling auth state change:", error);
-        }
+      if (currentSession?.user) {
+        const role = await fetchUserRole(currentSession.user.id);
+        setSession(currentSession);
+        setUserRole(role);
+      } else {
+        setSession(null);
+        setUserRole(null);
       }
-    );
+    });
 
     return () => {
-      console.log("Cleaning up auth provider...");
       mounted = false;
       subscription.unsubscribe();
     };

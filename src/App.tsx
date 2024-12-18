@@ -12,8 +12,6 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, isLoading } = useAuth();
-  
-  console.log("ProtectedRoute - session:", session, "isLoading:", isLoading);
 
   if (isLoading) {
     return (
@@ -24,7 +22,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!session) {
-    console.log("No session, redirecting to auth");
     return <Navigate to="/auth" />;
   }
 
