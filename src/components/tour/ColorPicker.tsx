@@ -4,6 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Check } from "lucide-react";
 
 interface ColorPickerProps {
   color: string;
@@ -43,13 +44,15 @@ export const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
           {colors.map((c) => (
             <button
               key={c}
-              className={`h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                color === c ? "ring-2 ring-offset-2 ring-primary" : ""
-              }`}
+              className="h-8 w-8 rounded-full relative flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{ backgroundColor: c }}
               onClick={() => onChange(c)}
               type="button"
-            />
+            >
+              {color === c && (
+                <Check className="h-4 w-4 text-white" />
+              )}
+            </button>
           ))}
         </div>
       </PopoverContent>

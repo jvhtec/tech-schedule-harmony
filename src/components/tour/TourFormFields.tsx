@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, Trash2 } from "lucide-react";
 
 interface TourFormFieldsProps {
   title: string;
@@ -41,6 +41,11 @@ export const TourFormFields = ({
 }: TourFormFieldsProps) => {
   const availableDepartments: Department[] = ["sound", "lights", "video"];
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    return format(new Date(dateString), "PPP");
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -64,104 +69,114 @@ export const TourFormFields = ({
 
       <div className="space-y-2">
         <Label>Tour Dates</Label>
-        {dates.map((date, index) => (
-          <div key={index} className="space-y-2 border p-4 rounded-lg relative">
-            {dates.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2"
-                onClick={() => handleRemoveDate(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-2">
-                <Label>Start Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date.start && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date.start ? format(new Date(date.start), "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date.start ? new Date(date.start) : undefined}
-                      onSelect={(newDate) => {
-                        if (newDate) {
-                          const dateStr = newDate.toISOString();
-                          onDateChange(index, "start", dateStr);
-                        }
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+        <div className="space-y-4">
+          {dates.map((date, index) => (
+            <div key={index} className="p-4 border rounded-lg relative space-y-4">
+              {dates.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 text-destructive hover:text-destructive"
+                  onClick={() => handleRemoveDate(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !date.start && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {date.start ? formatDate(date.start) : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date.start ? new Date(date.start) : undefined}
+                        onSelect={(newDate) => {
+                          if (newDate) {
+                            // Set time to start of day
+                            newDate.setHours(0, 0, 0, 0);
+                            onDateChange(index, "start", newDate.toISOString());
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !date.end && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {date.end ? formatDate(date.end) : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date.end ? new Date(date.end) : undefined}
+                        onSelect={(newDate) => {
+                          if (newDate) {
+                            // Set time to end of day
+                            newDate.setHours(23, 59, 59, 999);
+                            onDateChange(index, "end", newDate.toISOString());
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               
               <div className="space-y-2">
-                <Label>End Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date.end && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date.end ? format(new Date(date.end), "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date.end ? new Date(date.end) : undefined}
-                      onSelect={(newDate) => {
-                        if (newDate) {
-                          const dateStr = newDate.toISOString();
-                          onDateChange(index, "end", dateStr);
-                        }
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Label>Location</Label>
+                <Input
+                  list={`locations-${index}`}
+                  value={date.location}
+                  onChange={(e) => onDateChange(index, "location", e.target.value)}
+                  placeholder="Location"
+                  className="w-full"
+                />
+                <datalist id={`locations-${index}`}>
+                  {locations?.map((location) => (
+                    <option key={location} value={location} />
+                  ))}
+                </datalist>
               </div>
             </div>
-            
-            <Input
-              list={`locations-${index}`}
-              value={date.location}
-              onChange={(e) => onDateChange(index, "location", e.target.value)}
-              placeholder="Location"
-            />
-            <datalist id={`locations-${index}`}>
-              {locations?.map((location) => (
-                <option key={location} value={location} />
-              ))}
-            </datalist>
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleAddDate}
-        >
-          Add Date
-        </Button>
+          ))}
+          
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleAddDate}
+          >
+            Add Date
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-2">

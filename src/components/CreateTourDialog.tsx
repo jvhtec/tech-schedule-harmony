@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     field: "start" | "end" | "location",
     value: string
   ) => {
+    console.log("Date change:", { index, field, value });
     const newDates = [...dates];
     newDates[index] = { ...newDates[index], [field]: value };
     setDates(newDates);
@@ -134,9 +135,10 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Tour</DialogTitle>
+          <DialogDescription>Add a new tour with multiple dates and locations.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <TourFormFields
