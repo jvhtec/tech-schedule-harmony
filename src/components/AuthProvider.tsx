@@ -59,21 +59,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Initialize auth state
     const initializeAuth = async () => {
-      if (!mounted) return;
-
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         console.log("Initial session:", initialSession);
         
-        if (mounted) {
-          setSession(initialSession);
-          if (initialSession?.user) {
-            await fetchUserRole(initialSession.user.id);
-          } else {
-            setIsLoading(false);
-          }
+        if (!mounted) return;
+
+        setSession(initialSession);
+        
+        if (initialSession?.user) {
+          await fetchUserRole(initialSession.user.id);
+        } else {
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error in initializeAuth:", error);
@@ -85,17 +83,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Start initialization
     initializeAuth();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession);
       
       if (!mounted) return;
 
       setSession(currentSession);
-      setIsLoading(true); // Set loading true when auth state changes
       
       if (currentSession?.user) {
         await fetchUserRole(currentSession.user.id);
