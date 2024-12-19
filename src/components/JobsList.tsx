@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { AssignTechnicianDialog } from "./AssignTechnicianDialog";
@@ -10,10 +10,13 @@ interface JobsListProps {
   jobs?: Job[];
   isLoading: boolean;
   department: Department;
+  selectedJob: Job | null;
+  onSelectJob: Dispatch<SetStateAction<Job | null>>;
 }
 
-export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+export const JobsList = ({ jobs, isLoading, department, selectedJob, onSelectJob }: JobsListProps) => {
+  // Remove the local state since we're now using the props
+  const [dialogJob, setDialogJob] = useState<Job | null>(null);
 
   // Filter out tour dates (jobs with tour_id) and show only main tour entries
   const filteredJobs = jobs?.filter((job) => !job.tour_id) || [];
@@ -63,7 +66,7 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
                   </div>
                   <div 
                     className="mt-2"
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => setDialogJob(job)}
                   >
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(job.start_time), "MMM d, h:mm a")} -{" "}
@@ -84,12 +87,12 @@ export const JobsList = ({ jobs, isLoading, department }: JobsListProps) => {
         </CardContent>
       </Card>
 
-      {selectedJob && (
+      {dialogJob && (
         <AssignTechnicianDialog
-          open={!!selectedJob}
-          onOpenChange={(open) => !open && setSelectedJob(null)}
-          jobId={selectedJob.id}
-          jobTitle={selectedJob.title}
+          open={!!dialogJob}
+          onOpenChange={(open) => !open && setDialogJob(null)}
+          jobId={dialogJob.id}
+          jobTitle={dialogJob.title}
           department={department}
         />
       )}
