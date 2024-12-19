@@ -6,6 +6,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Technicians from "./pages/Technicians";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,11 @@ function App() {
             <Route path="/settings" element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/technicians" element={
+              <ProtectedRoute>
+                <Technicians />
               </ProtectedRoute>
             } />
           </Routes>
