@@ -5,10 +5,25 @@ import { UserInfo } from "@/components/UserInfo";
 import { TechniciansList } from "@/components/TechniciansList";
 import { useState } from "react";
 import { Department } from "@/types/department";
+import { useAuth } from "@/components/AuthProvider";
+import { useToast } from "@/components/ui/use-toast";
 
 const Technicians = () => {
   const navigate = useNavigate();
+  const { userRole } = useAuth();
+  const { toast } = useToast();
   const [selectedDepartment, setSelectedDepartment] = useState<Department>("sound");
+
+  // If user is not management, show access denied and redirect
+  if (userRole !== 'management') {
+    toast({
+      title: "Access Denied",
+      description: "Only management users can access this page",
+      variant: "destructive",
+    });
+    navigate('/');
+    return null;
+  }
 
   return (
     <div className="container mx-auto py-8">
