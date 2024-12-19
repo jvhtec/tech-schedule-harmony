@@ -30,44 +30,53 @@ const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
     try {
       console.log("Creating user with email:", data.email);
       
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Create the auth user with email and password
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
-        email_confirm: true
+        options: {
+          data: {
+            name: data.name,
+            role: data.role,
+          },
+        },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        console.log("Auth user created, updating profile...");
-        
-        // Update the profile with role and name
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({ 
-            role: data.role,
-            name: data.name || data.email
-          })
-          .eq("id", authData.user.id);
-
-        if (profileError) {
-          console.error("Error updating profile:", profileError);
-          throw profileError;
-        }
-
-        console.log("Profile updated successfully");
-
-        toast({
-          title: "Success",
-          description: "User created successfully.",
-        });
-        
-        // Invalidate users query to refresh the list
-        await queryClient.invalidateQueries({ queryKey: ['users'] });
-        onOpenChange(false);
-        reset();
+      if (signUpError) {
+        console.error("Error in signUp:", signUpError);
+        throw signUpError;
       }
+
+      if (!authData.user) {
+        throw new Error("No user data returned from signup");
+      }
+
+      console.log("Auth user created, updating profile...");
+
+      // Update the profile with role and name
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ 
+          role: data.role,
+          name: data.name || data.email
+        })
+        .eq("id", authData.user.id);
+
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
+
+      console.log("Profile updated successfully");
+
+      toast({
+        title: "Success",
+        description: "User created successfully. They will receive an email to confirm their account.",
+      });
+      
+      await queryClient.invalidateQueries({ queryKey: ['users'] });
+      onOpenChange(false);
+      reset();
     } catch (error: any) {
       console.error("Error creating user:", error);
       toast({
