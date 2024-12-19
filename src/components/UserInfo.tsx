@@ -1,11 +1,13 @@
 import { useAuth } from "@/components/AuthProvider";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export const UserInfo = () => {
   const { session, userRole, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   if (!session) return null;
 
@@ -35,6 +37,24 @@ export const UserInfo = () => {
           </span>
         )}
       </div>
+      <Button 
+        variant="outline" 
+        size="icon"
+        onClick={() => navigate('/dashboard')}
+        title="Dashboard"
+      >
+        <LayoutDashboard className="h-4 w-4" />
+      </Button>
+      {userRole === 'management' && (
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => navigate('/settings')}
+          title="Settings"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
+      )}
       <Button 
         variant="outline" 
         size="icon"
