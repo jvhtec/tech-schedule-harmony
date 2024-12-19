@@ -35,17 +35,21 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
     console.log("Creating job with color:", color);
     
     try {
+      const jobData = {
+        title,
+        description,
+        start_time: startTime,
+        end_time: endTime,
+        location,
+        color: color, // Ensure color is included
+        departments: selectedDepartments,
+      };
+
+      console.log("Submitting job data:", jobData);
+
       const { error } = await supabase
         .from("jobs")
-        .insert({
-          title,
-          description,
-          start_time: startTime,
-          end_time: endTime,
-          location,
-          color,
-          departments: selectedDepartments,
-        });
+        .insert(jobData);
 
       if (error) throw error;
 

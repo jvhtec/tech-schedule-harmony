@@ -27,6 +27,11 @@ const colors = [
 export function ColorPicker({ value, onChange }: ColorPickerProps) {
   console.log("ColorPicker rendered with value:", value);
   
+  const handleColorChange = (color: string) => {
+    console.log("Color selected:", color);
+    onChange(color);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -51,10 +56,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
               variant="ghost"
               className="relative h-8 w-8 rounded-full p-0 hover:scale-110 transition-transform"
               style={{ backgroundColor: color }}
-              onClick={() => {
-                console.log("Color selected:", color);
-                onChange(color);
-              }}
+              onClick={() => handleColorChange(color)}
             >
               {value === color && (
                 <Check className="h-4 w-4 text-white absolute inset-0 m-auto" />
