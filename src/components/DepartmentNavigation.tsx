@@ -1,7 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Department } from "@/types/department";
 
-export const DepartmentNavigation = () => {
+interface DepartmentNavigationProps {
+  activeDepartment: Department;
+}
+
+export const DepartmentNavigation = ({ activeDepartment }: DepartmentNavigationProps) => {
   const navigate = useNavigate();
   const departments = [
     { name: "Sound", path: "/" },
@@ -14,7 +19,11 @@ export const DepartmentNavigation = () => {
       {departments.map((dept) => (
         <Button
           key={dept.path}
-          variant="outline"
+          variant={dept.path === "/" && activeDepartment === "sound" || 
+                  dept.path === "/lights" && activeDepartment === "lights" ||
+                  dept.path === "/video" && activeDepartment === "video" 
+                    ? "default" 
+                    : "outline"}
           onClick={() => navigate(dept.path)}
           className="flex-1 md:flex-none"
         >

@@ -7,7 +7,7 @@ import { CalendarCard } from "@/components/calendar/CalendarCard";
 import { SimpleTechniciansList } from "@/components/calendar/SimpleTechniciansList";
 import { Department } from "@/types/department";
 import { PageHeader } from "@/components/header/PageHeader";
-import { CreateJobDialog } from "@/components/CreateJobDialog";
+import CreateJobDialog from "@/components/CreateJobDialog";
 import { CreateTourDialog } from "@/components/CreateTourDialog";
 import { DepartmentNavigation } from "@/components/DepartmentNavigation";
 
@@ -73,13 +73,13 @@ const Index = ({ department }: IndexProps) => {
       <CreateJobDialog
         open={isCreateJobOpen}
         onOpenChange={setIsCreateJobOpen}
-        department={department}
+        currentDepartment={department}
       />
 
       <CreateTourDialog
         open={isCreateTourOpen}
         onOpenChange={setIsCreateTourOpen}
-        department={department}
+        currentDepartment={department}
       />
     </div>
   );
