@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, LayoutDashboard } from "lucide-react";
-import { UserInfo } from "@/components/UserInfo";
+import { Plus, Users } from "lucide-react";
 import { Department } from "@/types/department";
+import { UserInfo } from "@/components/UserInfo";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/components/AuthProvider";
 
 interface PageHeaderProps {
   department: Department;
@@ -13,48 +12,27 @@ interface PageHeaderProps {
 
 export const PageHeader = ({ department, onCreateJob, onCreateTour }: PageHeaderProps) => {
   const navigate = useNavigate();
-  const { userRole } = useAuth();
   
-  const departmentTitles = {
-    sound: "Sound Department Tech Scheduler",
-    lights: "Lights Department Tech Scheduler",
-    video: "Video Department Tech Scheduler",
-  };
-
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+    <div className="flex items-center justify-between">
+      <h1 className="text-4xl font-bold text-slate-900 capitalize">
+        {department} Department
+      </h1>
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
-          size="icon"
-          onClick={() => navigate('/dashboard')}
-          title="Back to Dashboard"
+          onClick={() => navigate('/technicians')}
         >
-          <LayoutDashboard className="h-4 w-4" />
+          <Users className="h-4 w-4 mr-2" />
+          Technicians
         </Button>
-        <h1 className="text-2xl md:text-4xl font-bold text-slate-900 break-words">
-          {departmentTitles[department]}
-        </h1>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Button onClick={onCreateJob}>
-            <Plus className="mr-2 h-4 w-4" /> Create Job
-          </Button>
-          <Button onClick={onCreateTour} variant="secondary">
-            <Plus className="mr-2 h-4 w-4" /> Create Tour
-          </Button>
-          {userRole === 'management' && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigate('/settings')}
-              title="Settings"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+        <Button onClick={onCreateTour} variant="outline">
+          Create Tour
+        </Button>
+        <Button onClick={onCreateJob}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Job
+        </Button>
         <UserInfo />
       </div>
     </div>

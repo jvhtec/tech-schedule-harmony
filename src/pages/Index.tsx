@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
 import { CalendarCard } from "@/components/calendar/CalendarCard";
-import { SimpleTechniciansList } from "@/components/calendar/SimpleTechniciansList";
+import { JobsList } from "@/components/JobsList";
 import { Department } from "@/types/department";
 import { PageHeader } from "@/components/header/PageHeader";
 import CreateJobDialog from "@/components/CreateJobDialog";
@@ -67,7 +67,15 @@ const Index = ({ department }: IndexProps) => {
           onSelectJob={setSelectedJob}
           isLoading={isLoading}
         />
-        <SimpleTechniciansList department={department} />
+        <div className="lg:col-span-3">
+          <JobsList 
+            jobs={jobs || []} 
+            isLoading={isLoading} 
+            selectedJob={selectedJob}
+            onSelectJob={setSelectedJob}
+            department={department}
+          />
+        </div>
       </div>
 
       <CreateJobDialog
