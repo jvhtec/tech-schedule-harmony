@@ -25,19 +25,32 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
 
   const handleDelete = async () => {
     try {
-      // First delete all assignments
-      await supabase
-        .from("job_assignments")
-        .delete()
-        .eq("job_id", job.id);
+      console.log("Deleting job:", job.id);
+      
+      if (job.job_type === 'tour') {
+        // First delete all tour dates associated with this tour
+        console.log("Deleting tour dates for tour:", job.id);
+        const { error: tourDatesError } = await supabase
+          .from("jobs")
+          .delete()
+          .eq("tour_id", job.id);
 
-      // Then delete the job
+        if (tourDatesError) {
+          console.error("Error deleting tour dates:", tourDatesError);
+          throw tourDatesError;
+        }
+      }
+
+      // Then delete the job itself
       const { error } = await supabase
         .from("jobs")
         .delete()
         .eq("id", job.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error deleting job:", error);
+        throw error;
+      }
 
       toast({
         title: "Success",
