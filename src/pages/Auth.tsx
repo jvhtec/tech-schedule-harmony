@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -11,6 +11,12 @@ const Auth = () => {
   const { session, isLoading } = useAuth();
   const [showSignUp, setShowSignUp] = useState(false);
 
+  useEffect(() => {
+    if (session) {
+      navigate("/dashboard"); // Redirect on successful login
+    }
+  }, [session, navigate]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -20,8 +26,7 @@ const Auth = () => {
   }
 
   if (session) {
-    navigate("/dashboard"); // Redirect on successful login
-    return null;
+    return null; // Avoid rendering anything while redirecting
   }
 
   return (
