@@ -26,10 +26,10 @@ export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDi
   };
 
   const [title, setTitle] = useState(job.title);
-  const [description, setDescription] = useState(job.description || "");
+  const [description, setDescription] = useState(job.description ?? "");
   const [startTime, setStartTime] = useState(formatDateForInput(job.start_time));
   const [endTime, setEndTime] = useState(formatDateForInput(job.end_time));
-  const [location, setLocation] = useState(job.location || "");
+  const [location, setLocation] = useState(job.location ?? "");
   const [departments, setDepartments] = useState<Department[]>(job.departments || []);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -39,10 +39,10 @@ export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDi
     if (open) {
       console.log("Resetting form state with job data:", job);
       setTitle(job.title);
-      setDescription(job.description || "");
+      setDescription(job.description ?? "");
       setStartTime(formatDateForInput(job.start_time));
       setEndTime(formatDateForInput(job.end_time));
-      setLocation(job.location || "");
+      setLocation(job.location ?? "");
       setDepartments(job.departments || []);
     }
   }, [job, open]);
@@ -52,16 +52,20 @@ export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDi
     console.log("Submitting job update...");
     
     try {
+      const updateData = {
+        title,
+        description: description || null, // Convert empty string to null
+        start_time: startTime,
+        end_time: endTime,
+        location: location || null, // Convert empty string to null
+        departments,
+      };
+
+      console.log("Update data:", updateData);
+
       const { error } = await supabase
         .from("jobs")
-        .update({
-          title,
-          description,
-          start_time: startTime,
-          end_time: endTime,
-          location,
-          departments,
-        })
+        .update(updateData)
         .eq("id", job.id);
 
       if (error) throw error;
