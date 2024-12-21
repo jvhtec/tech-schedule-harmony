@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +34,22 @@ export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDi
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Reset form state when dialog opens with new job data
+  useEffect(() => {
+    if (open) {
+      console.log("Resetting form state with job data:", job);
+      setTitle(job.title);
+      setDescription(job.description || "");
+      setStartTime(formatDateForInput(job.start_time));
+      setEndTime(formatDateForInput(job.end_time));
+      setLocation(job.location || "");
+      setDepartments(job.departments || []);
+    }
+  }, [job, open]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting job update...");
     
     try {
       const { error } = await supabase
@@ -52,6 +66,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDi
 
       if (error) throw error;
 
+      console.log("Job updated successfully");
       await queryClient.invalidateQueries({ queryKey: ["jobs"] });
 
       toast({
