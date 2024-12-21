@@ -41,27 +41,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    console.log("Starting sign out process");
+    
     try {
-      console.log("Starting sign out process");
+      // First clear local state
+      setSession(null);
+      setUserRole(null);
+
+      // Clear any stored session data from localStorage
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Then attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Error in signOut:", error);
-        // Even if there's an error, we should clear the local state
-        setSession(null);
-        setUserRole(null);
-        throw error;
+        // Error is logged but we don't throw it since local state is already cleared
+      } else {
+        console.log("Sign out successful");
       }
-
-      console.log("Sign out successful");
-      setSession(null);
-      setUserRole(null);
     } catch (error) {
       console.error("Error in signOut catch block:", error);
-      // Ensure state is cleared even if there's an error
-      setSession(null);
-      setUserRole(null);
-      throw error;
+      // We don't throw the error since local state is already cleared
     }
   };
 
