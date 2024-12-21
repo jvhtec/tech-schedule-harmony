@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Job } from "@/types/job";
 import { Department } from "@/types/department";
+import { format } from "date-fns";
 
 interface EditJobDialogProps {
   open: boolean;
@@ -19,12 +20,17 @@ interface EditJobDialogProps {
 }
 
 export const EditJobDialog = ({ open, onOpenChange, job, department }: EditJobDialogProps) => {
+  // Format the dates to match the input format (YYYY-MM-DDTHH:mm)
+  const formatDateForInput = (dateString: string) => {
+    return format(new Date(dateString), "yyyy-MM-dd'T'HH:mm");
+  };
+
   const [title, setTitle] = useState(job.title);
   const [description, setDescription] = useState(job.description || "");
-  const [startTime, setStartTime] = useState(job.start_time);
-  const [endTime, setEndTime] = useState(job.end_time);
+  const [startTime, setStartTime] = useState(formatDateForInput(job.start_time));
+  const [endTime, setEndTime] = useState(formatDateForInput(job.end_time));
   const [location, setLocation] = useState(job.location || "");
-  const [departments, setDepartments] = useState<Department[]>(job.departments);
+  const [departments, setDepartments] = useState<Department[]>(job.departments || []);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
