@@ -43,7 +43,12 @@ export const TourFormFields = ({
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
-    return format(new Date(dateString), "PPP");
+    try {
+      return format(new Date(dateString), "PPP");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
   };
 
   return (
@@ -106,9 +111,9 @@ export const TourFormFields = ({
                         selected={date.start ? new Date(date.start) : undefined}
                         onSelect={(newDate) => {
                           if (newDate) {
-                            // Set time to start of day
-                            newDate.setHours(0, 0, 0, 0);
-                            onDateChange(index, "start", newDate.toISOString());
+                            const dateWithTime = new Date(newDate);
+                            dateWithTime.setHours(0, 0, 0, 0);
+                            onDateChange(index, "start", dateWithTime.toISOString());
                           }
                         }}
                         initialFocus
@@ -138,9 +143,9 @@ export const TourFormFields = ({
                         selected={date.end ? new Date(date.end) : undefined}
                         onSelect={(newDate) => {
                           if (newDate) {
-                            // Set time to end of day
-                            newDate.setHours(23, 59, 59, 999);
-                            onDateChange(index, "end", newDate.toISOString());
+                            const dateWithTime = new Date(newDate);
+                            dateWithTime.setHours(23, 59, 59, 999);
+                            onDateChange(index, "end", dateWithTime.toISOString());
                           }
                         }}
                         initialFocus
