@@ -44,9 +44,11 @@ const Index = ({ department }: IndexProps) => {
       console.log("Fetched jobs:", data);
       return data as Job[];
     },
-    onError: (error) => {
-      console.error("Error in jobs query:", error);
-      setSelectedJob(null); // Reset selection on error
+    meta: {
+      errorHandler: (error: Error) => {
+        console.error("Error in jobs query:", error);
+        setSelectedJob(null); // Reset selection on error
+      }
     }
   });
 

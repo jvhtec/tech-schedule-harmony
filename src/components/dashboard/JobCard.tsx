@@ -15,6 +15,10 @@ export const JobCard = ({ job, onClick, department }: JobCardProps) => {
   const { userRole } = useAuth();
   const isManagement = userRole === 'management';
 
+  const handleJobOperation = () => {
+    console.log("Job operation completed in JobCard");
+  };
+
   return (
     <div
       className="p-4 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors"
@@ -42,7 +46,11 @@ export const JobCard = ({ job, onClick, department }: JobCardProps) => {
           </div>
           {isManagement && (
             <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-              <JobActions job={job} department={department} />
+              <JobActions 
+                job={job} 
+                department={department}
+                onOperationComplete={handleJobOperation}
+              />
             </div>
           )}
         </div>

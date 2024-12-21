@@ -14,6 +14,10 @@ export const DailyJobsList = ({ date, jobs, onSelectJob }: DailyJobsListProps) =
   const { userRole } = useAuth();
   const isManagement = userRole === 'management';
 
+  const handleJobOperation = () => {
+    console.log("Job operation completed in DailyJobsList");
+  };
+
   return (
     <div>
       <h3 className="font-medium mb-4">Jobs for {format(date, "MMMM d, yyyy")}:</h3>
@@ -53,6 +57,7 @@ export const DailyJobsList = ({ date, jobs, onSelectJob }: DailyJobsListProps) =
                   <JobActions 
                     job={job} 
                     department={job.departments?.[0] || "sound"} 
+                    onOperationComplete={handleJobOperation}
                   />
                 </div>
               )}
