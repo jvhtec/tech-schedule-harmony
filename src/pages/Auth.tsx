@@ -10,23 +10,23 @@ const Auth = () => {
   const navigate = useNavigate();
   const { session, isLoading } = useAuth();
   const [showSignUp, setShowSignUp] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
+  // Redirect to dashboard if session exists
   useEffect(() => {
     if (session) {
-      navigate("/dashboard"); // Redirect on successful login
+      setIsRedirecting(true);
+      navigate("/dashboard");
     }
   }, [session, navigate]);
 
-  if (isLoading) {
+  // Show a loader while waiting for session or redirecting
+  if (isLoading || isRedirecting) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
-  }
-
-  if (session) {
-    return null; // Avoid rendering anything while redirecting
   }
 
   return (
@@ -36,8 +36,8 @@ const Auth = () => {
           <UserInfo />
         </div>
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Welcome</h1>
-          <p className="text-lg text-muted-foreground">to Sector-Pro Tech Area</p>
+          <h1 className="text-4xl font-bold mb-2">Bienvenido</h1>
+          <p className="text-lg text-muted-foreground">al Area Tecnica Sector-Pro</p>
         </div>
         <Card className="p-6 w-full">
           {showSignUp ? (
@@ -50,7 +50,7 @@ const Auth = () => {
                   onClick={() => setShowSignUp(true)}
                   className="text-primary hover:underline"
                 >
-                  Don't have an account? Sign up
+                  Crear cuenta
                 </button>
               </div>
             </>
