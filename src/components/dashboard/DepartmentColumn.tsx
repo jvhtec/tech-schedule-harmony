@@ -23,10 +23,14 @@ export const DepartmentColumn = ({
     video: "Video Department",
   };
 
-  // Filter jobs to only show those that include this department
+  // Filter jobs to show both regular jobs and tour dates for this department
   const filteredJobs = jobs.filter(job => 
-    job.departments && job.departments.includes(department)
+    job.departments && job.departments.includes(department) && 
+    // Include both regular jobs and tour dates
+    (job.job_type === 'single' || job.job_type === 'tour' || job.tour_id)
   );
+
+  console.log(`Filtered jobs for ${department}:`, filteredJobs);
 
   return (
     <Card>
