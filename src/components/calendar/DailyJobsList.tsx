@@ -1,6 +1,8 @@
 import { format } from "date-fns";
 import { Job } from "@/types/job";
 import { JobAssignments } from "@/components/JobAssignments";
+import { JobActions } from "@/components/jobs/JobActions";
+import { useAuth } from "@/components/AuthProvider";
 
 interface DailyJobsListProps {
   date: Date;
@@ -9,6 +11,9 @@ interface DailyJobsListProps {
 }
 
 export const DailyJobsList = ({ date, jobs, onSelectJob }: DailyJobsListProps) => {
+  const { userRole } = useAuth();
+  const isManagement = userRole === 'management';
+
   return (
     <div>
       <h3 className="font-medium mb-4">Jobs for {format(date, "MMMM d, yyyy")}:</h3>
@@ -24,12 +29,12 @@ export const DailyJobsList = ({ date, jobs, onSelectJob }: DailyJobsListProps) =
             onClick={() => onSelectJob(job)}
           >
             <div className="flex items-start justify-between">
-              <div>
-                <p className="font-medium">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">
                   {job.title}
-                  {job.tour_id && (
+                  {(job.tour_id || job.job_type === 'tour') && (
                     <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                      Tour
+                      {job.tour_id ? 'Tour Date' : 'Tour'}
                     </span>
                   )}
                 </p>
@@ -38,11 +43,19 @@ export const DailyJobsList = ({ date, jobs, onSelectJob }: DailyJobsListProps) =
                   {format(new Date(job.end_time), "h:mm a")}
                 </p>
                 {job.location && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground truncate">
                     {job.location}
                   </p>
                 )}
               </div>
+              {isManagement && (
+                <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <JobActions 
+                    job={job} 
+                    department={job.departments?.[0] || "sound"} 
+                  />
+                </div>
+              )}
             </div>
             <JobAssignments jobId={job.id} />
           </div>
