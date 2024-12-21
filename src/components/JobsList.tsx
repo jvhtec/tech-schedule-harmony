@@ -12,9 +12,17 @@ interface JobsListProps {
   department: Department;
   selectedJob: Job | null;
   onSelectJob: Dispatch<SetStateAction<Job | null>>;
+  onJobOperation: () => void;
 }
 
-export const JobsList = ({ jobs, isLoading, department, selectedJob, onSelectJob }: JobsListProps) => {
+export const JobsList = ({ 
+  jobs, 
+  isLoading, 
+  department, 
+  selectedJob, 
+  onSelectJob,
+  onJobOperation 
+}: JobsListProps) => {
   const [dialogJob, setDialogJob] = useState<Job | null>(null);
 
   // Filter out tour dates (jobs with tour_id) and show only main tour entries
@@ -64,7 +72,11 @@ export const JobsList = ({ jobs, isLoading, department, selectedJob, onSelectJob
                         )}
                       </div>
                       <div className="flex-shrink-0">
-                        <JobActions job={job} department={department} />
+                        <JobActions 
+                          job={job} 
+                          department={department}
+                          onOperationComplete={onJobOperation}
+                        />
                       </div>
                     </div>
                     <div 

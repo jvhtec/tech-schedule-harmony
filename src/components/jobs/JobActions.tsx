@@ -17,14 +17,20 @@ import { DeleteJobDialog } from "./dialogs/DeleteJobDialog";
 interface JobActionsProps {
   job: Job;
   department: Department;
+  onOperationComplete: () => void;
 }
 
-export const JobActions = ({ job, department }: JobActionsProps) => {
+export const JobActions = ({ job, department, onOperationComplete }: JobActionsProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [showAddDateDialog, setShowAddDateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { userRole } = useAuth();
+
+  const handleDialogClose = () => {
+    console.log("Dialog closed, notifying parent of operation completion");
+    onOperationComplete();
+  };
 
   if (userRole !== 'management') return null;
 
@@ -64,7 +70,10 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       {showEditDialog && (
         <EditJobDialogWrapper
           isOpen={showEditDialog}
-          onOpenChange={setShowEditDialog}
+          onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) handleDialogClose();
+          }}
           job={job}
           department={department}
         />
@@ -73,7 +82,10 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       {showAddDateDialog && (
         <AddTourDateDialogWrapper
           isOpen={showAddDateDialog}
-          onOpenChange={setShowAddDateDialog}
+          onOpenChange={(open) => {
+            setShowAddDateDialog(open);
+            if (!open) handleDialogClose();
+          }}
           tour={job}
         />
       )}
@@ -81,7 +93,10 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       {showDeleteDialog && (
         <DeleteJobDialog
           isOpen={showDeleteDialog}
-          onOpenChange={setShowDeleteDialog}
+          onOpenChange={(open) => {
+            setShowDeleteDialog(open);
+            if (!open) handleDialogClose();
+          }}
           job={job}
         />
       )}

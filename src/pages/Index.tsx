@@ -35,9 +35,19 @@ const Index = ({ department }: IndexProps) => {
         throw error;
       }
 
+      // If the selected job was deleted, reset it
+      if (selectedJob && !data?.find(job => job.id === selectedJob.id)) {
+        console.log("Selected job no longer exists, resetting selection");
+        setSelectedJob(null);
+      }
+
       console.log("Fetched jobs:", data);
       return data as Job[];
     },
+    onError: (error) => {
+      console.error("Error in jobs query:", error);
+      setSelectedJob(null); // Reset selection on error
+    }
   });
 
   const getJobsForDate = (date: Date) => {
@@ -47,6 +57,12 @@ const Index = ({ department }: IndexProps) => {
         format(new Date(job.start_time), "yyyy-MM-dd") ===
         format(date, "yyyy-MM-dd")
     );
+  };
+
+  // Handler to ensure state consistency
+  const handleJobOperation = () => {
+    console.log("Job operation completed, resetting selected job");
+    setSelectedJob(null);
   };
 
   return (
@@ -74,6 +90,7 @@ const Index = ({ department }: IndexProps) => {
             selectedJob={selectedJob}
             onSelectJob={setSelectedJob}
             department={department}
+            onJobOperation={handleJobOperation}
           />
         </div>
       </div>
