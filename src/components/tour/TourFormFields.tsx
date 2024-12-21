@@ -3,12 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Department } from "@/types/department";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 interface TourFormFieldsProps {
   title: string;
@@ -40,16 +36,6 @@ export const TourFormFields = ({
   locations,
 }: TourFormFieldsProps) => {
   const availableDepartments: Department[] = ["sound", "lights", "video"];
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    try {
-      return format(new Date(dateString), "PPP");
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "";
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -92,66 +78,22 @@ export const TourFormFields = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !date.start && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date.start ? formatDate(date.start) : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date.start ? new Date(date.start) : undefined}
-                        onSelect={(newDate) => {
-                          if (newDate) {
-                            const dateWithTime = new Date(newDate);
-                            dateWithTime.setHours(0, 0, 0, 0);
-                            onDateChange(index, "start", dateWithTime.toISOString());
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="datetime-local"
+                    value={date.start}
+                    onChange={(e) => onDateChange(index, "start", e.target.value)}
+                    required
+                  />
                 </div>
                 
                 <div className="space-y-2">
                   <Label>End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !date.end && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date.end ? formatDate(date.end) : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={date.end ? new Date(date.end) : undefined}
-                        onSelect={(newDate) => {
-                          if (newDate) {
-                            const dateWithTime = new Date(newDate);
-                            dateWithTime.setHours(23, 59, 59, 999);
-                            onDateChange(index, "end", dateWithTime.toISOString());
-                          }
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="datetime-local"
+                    value={date.end}
+                    onChange={(e) => onDateChange(index, "end", e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               
