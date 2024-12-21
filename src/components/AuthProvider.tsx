@@ -43,26 +43,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     console.log("Starting sign out process");
     
-    // First clear all local state and storage
-    setSession(null);
-    setUserRole(null);
-    
-    // Clear all Supabase session data from localStorage
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('supabase.auth.')) {
-        localStorage.removeItem(key);
-      }
-    });
-
     try {
-      // Then attempt to sign out from Supabase
-      await supabase.auth.signOut({
-        scope: 'local'  // Only clear local session
-      });
-      console.log("Sign out successful");
+      // First attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Supabase signOut error:", error);
+      }
     } catch (error) {
-      console.error("Error in signOut:", error);
-      // Error is logged but we don't throw since local state is already cleared
+      console.error("Error during signOut:", error);
+    } finally {
+      // Always clear local state and storage, regardless of server response
+      console.log("Clearing local state and storage");
+      setSession(null);
+      setUserRole(null);
+      
+      // Clear all Supabase-related items from localStorage
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Force refresh the auth state
+      await supabase.auth.refreshSession();
+      console.log("Sign out process completed");
     }
   };
 
