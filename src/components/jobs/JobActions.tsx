@@ -7,25 +7,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { EditJobDialog } from "./EditJobDialog";
-import { AssignTechnicianDialog } from "../AssignTechnicianDialog";
 import { Department } from "@/types/department";
 import { Job } from "@/types/job";
 import { useAuth } from "@/components/AuthProvider";
-import { AddTourDateDialog } from "../tour/AddTourDateDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { EditJobDialogWrapper } from "./dialogs/EditJobDialogWrapper";
+import { AddTourDateDialogWrapper } from "./dialogs/AddTourDateDialogWrapper";
+import { DeleteJobDialog } from "./dialogs/DeleteJobDialog";
 
 interface JobActionsProps {
   job: Job;
@@ -38,78 +25,8 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
   const [showAddDateDialog, setShowAddDateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { userRole } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   if (userRole !== 'management') return null;
-
-  const handleDelete = async () => {
-    try {
-      console.log("Deleting job:", job.id, "Type:", job.job_type);
-
-      if (job.job_type === 'tour') {
-        // Delete all tour dates first
-        console.log("Deleting tour dates for tour:", job.id);
-        const { error: tourDatesError } = await supabase
-          .from('jobs')
-          .delete()
-          .eq('tour_id', job.id);
-
-        if (tourDatesError) throw tourDatesError;
-      }
-
-      // Delete the job itself
-      const { error } = await supabase
-        .from('jobs')
-        .delete()
-        .eq('id', job.id);
-
-      if (error) throw error;
-
-      // Invalidate all relevant queries
-      console.log("Invalidating queries after job deletion");
-      await queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const queryKey = query.queryKey[0];
-          return queryKey === 'jobs' || queryKey === 'job-assignments';
-        }
-      });
-
-      toast({
-        title: "Success",
-        description: "Job deleted successfully",
-      });
-
-      setShowDeleteDialog(false);
-    } catch (error) {
-      console.error('Error deleting job:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete job",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getDeleteDialogContent = () => {
-    if (job.job_type === 'tour') {
-      return {
-        title: "Delete Tour",
-        description: "Are you sure you want to delete this tour? This will also delete all associated tour dates.",
-      };
-    } else if (job.tour_id) {
-      return {
-        title: "Delete Tour Date",
-        description: "Are you sure you want to delete this tour date?",
-      };
-    }
-    return {
-      title: "Delete Job",
-      description: "Are you sure you want to delete this job?",
-    };
-  };
-
-  const deleteDialogContent = getDeleteDialogContent();
 
   return (
     <>
@@ -145,73 +62,29 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       </DropdownMenu>
 
       {showEditDialog && (
-        <EditJobDialog
-          open={showEditDialog}
-          onOpenChange={(open) => {
-            setShowEditDialog(open);
-            if (!open) {
-              // Invalidate queries when dialog closes
-              queryClient.invalidateQueries({ 
-                predicate: (query) => {
-                  const queryKey = query.queryKey[0];
-                  return queryKey === 'jobs' || queryKey === 'job-assignments';
-                }
-              });
-            }
-          }}
+        <EditJobDialogWrapper
+          isOpen={showEditDialog}
+          onOpenChange={setShowEditDialog}
           job={job}
           department={department}
         />
       )}
 
-      {showAssignDialog && (
-        <AssignTechnicianDialog
-          open={showAssignDialog}
-          onOpenChange={setShowAssignDialog}
-          jobId={job.id}
-          jobTitle={job.title}
-          department={department}
-        />
-      )}
-
       {showAddDateDialog && (
-        <AddTourDateDialog
-          open={showAddDateDialog}
-          onOpenChange={(open) => {
-            setShowAddDateDialog(open);
-            if (!open) {
-              // Invalidate queries when dialog closes
-              queryClient.invalidateQueries({ 
-                predicate: (query) => {
-                  const queryKey = query.queryKey[0];
-                  return queryKey === 'jobs';
-                }
-              });
-            }
-          }}
+        <AddTourDateDialogWrapper
+          isOpen={showAddDateDialog}
+          onOpenChange={setShowAddDateDialog}
           tour={job}
         />
       )}
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{deleteDialogContent.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {deleteDialogContent.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {showDeleteDialog && (
+        <DeleteJobDialog
+          isOpen={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          job={job}
+        />
+      )}
     </>
   );
 };
