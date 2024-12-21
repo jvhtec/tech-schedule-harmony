@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { ColorPicker } from "./tour/ColorPicker";
+import { SimplifiedColorPicker } from "./tour/SimplifiedColorPicker";
+import { SimplifiedTourDateInput } from "./tour/SimplifiedTourDateInput";
 import { useLocations } from "@/hooks/useLocations";
 import { Department } from "@/types/department";
-import { TourFormFields } from "./tour/TourFormFields";
 
 interface CreateTourDialogProps {
   open: boolean;
@@ -19,17 +22,18 @@ interface CreateTourDialogProps {
 export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: CreateTourDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [dates, setDates] = useState<{ start: string; end: string; location: string }[]>([
-    { start: "", end: "", location: "" },
+  const [dates, setDates] = useState<{ date: string; location: string }[]>([
+    { date: "", location: "" },
   ]);
   const [color, setColor] = useState("#8B5CF6");
   const [departments, setDepartments] = useState<Department[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: locations } = useLocations();
+  const availableDepartments: Department[] = ["sound", "lights", "video"];
 
   const handleAddDate = () => {
-    setDates([...dates, { start: "", end: "", location: "" }]);
+    setDates([...dates, { date: "", location: "" }]);
   };
 
   const handleRemoveDate = (index: number) => {
@@ -41,10 +45,9 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
 
   const handleDateChange = (
     index: number,
-    field: "start" | "end" | "location",
+    field: "date" | "location",
     value: string
   ) => {
-    console.log("Date change:", { index, field, value });
     const newDates = [...dates];
     newDates[index] = { ...newDates[index], [field]: value };
     setDates(newDates);
@@ -56,33 +59,6 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
     } else {
       setDepartments(departments.filter(d => d !== dept));
     }
-  };
-
-  const validateDates = () => {
-    return dates.every(date => {
-      if (!date.start || !date.end) {
-        toast({
-          title: "Error",
-          description: "Please select both start and end dates for all tour dates",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      const startDate = new Date(date.start);
-      const endDate = new Date(date.end);
-      
-      if (endDate < startDate) {
-        toast({
-          title: "Error",
-          description: "End date cannot be before start date",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      return true;
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,32 +73,38 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
       return;
     }
 
-    if (!validateDates()) {
+    if (!dates.every(date => date.date)) {
+      toast({
+        title: "Error",
+        description: "Please select a date for all tour dates",
+        variant: "destructive",
+      });
       return;
     }
 
-    console.log("Creating new tour:", { title, dates, color, departments });
-
     try {
-      // Filter out any dates that don't have both start and end dates
-      const validDates = dates.filter(date => date.start && date.end);
+      // Filter out any dates that don't have both fields
+      const validDates = dates.filter(date => date.date);
       
       if (validDates.length === 0) {
         toast({
           title: "Error",
-          description: "At least one valid date range is required",
+          description: "At least one valid date is required",
           variant: "destructive",
         });
         return;
       }
+
+      // Sort dates chronologically
+      validDates.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
       const { data: tourData, error: tourError } = await supabase
         .from("jobs")
         .insert({
           title,
           description,
-          start_time: validDates[0].start,
-          end_time: validDates[validDates.length - 1].end,
+          start_time: `${validDates[0].date}T00:00:00`,
+          end_time: `${validDates[validDates.length - 1].date}T23:59:59`,
           location: validDates[0].location,
           job_type: "tour" as const,
           color,
@@ -149,8 +131,8 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
       const dateEntries = validDates.map((date) => ({
         title: `${title} (Tour Date)`,
         description,
-        start_time: date.start,
-        end_time: date.end,
+        start_time: `${date.date}T00:00:00`,
+        end_time: `${date.date}T23:59:59`,
         location: date.location,
         job_type: "single" as const,
         tour_id: tourData.id,
@@ -175,7 +157,7 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
       onOpenChange(false);
       setTitle("");
       setDescription("");
-      setDates([{ start: "", end: "", location: "" }]);
+      setDates([{ date: "", location: "" }]);
       setColor("#8B5CF6");
       setDepartments([currentDepartment]);
     } catch (error) {
@@ -196,24 +178,74 @@ export const CreateTourDialog = ({ open, onOpenChange, currentDepartment }: Crea
           <DialogDescription>Add a new tour with multiple dates and locations.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <TourFormFields
-            title={title}
-            setTitle={setTitle}
-            description={description}
-            setDescription={setDescription}
-            dates={dates}
-            onDateChange={handleDateChange}
-            handleAddDate={handleAddDate}
-            handleRemoveDate={handleRemoveDate}
-            departments={departments}
-            handleDepartmentChange={handleDepartmentChange}
-            currentDepartment={currentDepartment}
-            locations={locations}
-          />
           <div className="space-y-2">
-            <Label>Color</Label>
-            <ColorPicker value={color} onChange={setColor} />
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
           </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tour Dates</Label>
+            <div className="space-y-4">
+              {dates.map((date, index) => (
+                <SimplifiedTourDateInput
+                  key={index}
+                  index={index}
+                  date={date}
+                  onDateChange={handleDateChange}
+                  onRemove={() => handleRemoveDate(index)}
+                  showRemove={dates.length > 1}
+                  locations={locations}
+                />
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleAddDate}
+              >
+                Add Date
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Departments</Label>
+            <div className="flex flex-col gap-2">
+              {availableDepartments.map((dept) => (
+                <div key={dept} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`dept-${dept}`}
+                    checked={departments.includes(dept)}
+                    onCheckedChange={(checked) => 
+                      handleDepartmentChange(dept, checked as boolean)
+                    }
+                    disabled={dept === currentDepartment}
+                  />
+                  <Label htmlFor={`dept-${dept}`}>
+                    {dept.charAt(0).toUpperCase() + dept.slice(1)}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <SimplifiedColorPicker value={color} onChange={setColor} />
+
           <Button type="submit" className="w-full">
             Create Tour
           </Button>
