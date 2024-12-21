@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { ColorPicker } from "@/components/ui/color-picker";
+import { SimplifiedJobColorPicker } from "./jobs/SimplifiedJobColorPicker";
 
 interface CreateJobDialogProps {
   open: boolean;
@@ -23,7 +23,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
-  const [color, setColor] = useState("#9b87f5");
+  const [color, setColor] = useState("#7E69AB");
   const [selectedDepartments, setSelectedDepartments] = useState<Department[]>([currentDepartment]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -41,7 +41,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
         start_time: startTime,
         end_time: endTime,
         location,
-        color: color, // Ensure color is included
+        color: color,
         departments: selectedDepartments,
       };
 
@@ -68,7 +68,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
       setStartTime("");
       setEndTime("");
       setLocation("");
-      setColor("#9b87f5");
+      setColor("#7E69AB");
       setSelectedDepartments([currentDepartment]);
     } catch (error) {
       console.error("Error creating job:", error);
@@ -137,10 +137,7 @@ const CreateJobDialog = ({ open, onOpenChange, currentDepartment }: CreateJobDia
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Color</Label>
-            <ColorPicker value={color} onChange={setColor} />
-          </div>
+          <SimplifiedJobColorPicker value={color} onChange={setColor} />
 
           <div className="space-y-2">
             <Label>Departments</Label>
