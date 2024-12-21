@@ -21,26 +21,24 @@ export const LoginForm = () => {
     setError(null);
 
     try {
+      const email = formData.email.trim().toLowerCase();
+      const password = formData.password.trim();
+
       // Basic validation
-      if (!formData.email.trim() || !formData.password.trim()) {
+      if (!email || !password) {
         throw new Error("Please enter both email and password");
       }
 
-      console.log("Starting login attempt for email:", formData.email);
+      console.log("Attempting login for email:", email);
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email.trim().toLowerCase(), // Ensure email is lowercase
-        password: formData.password.trim(),
+        email,
+        password,
       });
 
       if (signInError) {
-        console.error("Supabase login error:", {
-          code: signInError.name,
-          message: signInError.message,
-          details: signInError
-        });
-
-        // Handle specific error cases
+        console.error("Login error:", signInError);
+        
         if (signInError.message.includes("Invalid login credentials")) {
           throw new Error("Invalid email or password. Please check your credentials and try again.");
         } else if (signInError.message.includes("Email not confirmed")) {
@@ -51,7 +49,7 @@ export const LoginForm = () => {
       }
 
       if (!data?.user) {
-        console.error("No user data returned from login attempt");
+        console.error("No user data returned from login");
         throw new Error("Login failed. Please try again.");
       }
 
