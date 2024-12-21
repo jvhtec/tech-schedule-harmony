@@ -45,8 +45,11 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
 
   const handleDelete = async () => {
     try {
+      console.log("Deleting job:", job.id, "Type:", job.job_type);
+
       if (job.job_type === 'tour') {
         // Delete all tour dates first
+        console.log("Deleting tour dates for tour:", job.id);
         const { error: tourDatesError } = await supabase
           .from('jobs')
           .delete()
@@ -63,12 +66,21 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
 
       if (error) throw error;
 
-      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      // Invalidate all relevant queries
+      console.log("Invalidating queries after job deletion");
+      await queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const queryKey = query.queryKey[0];
+          return queryKey === 'jobs' || queryKey === 'job-assignments';
+        }
+      });
 
       toast({
         title: "Success",
         description: "Job deleted successfully",
       });
+
+      setShowDeleteDialog(false);
     } catch (error) {
       console.error('Error deleting job:', error);
       toast({
@@ -135,7 +147,18 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       {showEditDialog && (
         <EditJobDialog
           open={showEditDialog}
-          onOpenChange={setShowEditDialog}
+          onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) {
+              // Invalidate queries when dialog closes
+              queryClient.invalidateQueries({ 
+                predicate: (query) => {
+                  const queryKey = query.queryKey[0];
+                  return queryKey === 'jobs' || queryKey === 'job-assignments';
+                }
+              });
+            }
+          }}
           job={job}
           department={department}
         />
@@ -154,7 +177,18 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
       {showAddDateDialog && (
         <AddTourDateDialog
           open={showAddDateDialog}
-          onOpenChange={setShowAddDateDialog}
+          onOpenChange={(open) => {
+            setShowAddDateDialog(open);
+            if (!open) {
+              // Invalidate queries when dialog closes
+              queryClient.invalidateQueries({ 
+                predicate: (query) => {
+                  const queryKey = query.queryKey[0];
+                  return queryKey === 'jobs';
+                }
+              });
+            }
+          }}
           tour={job}
         />
       )}
