@@ -21,9 +21,14 @@ export const LoginForm = () => {
     setError(null);
 
     try {
-      console.log("Attempting login with email:", formData.email);
+      console.log("Starting login attempt with email:", formData.email);
+      
+      if (!formData.email || !formData.password) {
+        throw new Error("Please enter both email and password");
+      }
+
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
       });
 
@@ -34,17 +39,20 @@ export const LoginForm = () => {
           name: authError.name
         });
         
-        // Handle specific error cases
         if (authError.message?.includes("Invalid login credentials")) {
-          throw new Error("Invalid email or password. Please try again.");
-        } else if (authError.message?.includes("Database error")) {
-          throw new Error("System is temporarily unavailable. Please try again in a few moments.");
+          throw new Error("Invalid email or password. Please check your credentials and try again.");
+        } else if (authError.message?.includes("Email not confirmed")) {
+          throw new Error("Please verify your email address before logging in.");
         } else {
-          throw authError;
+          throw new Error("An error occurred during login. Please try again.");
         }
       }
 
-      console.log("Login successful:", data);
+      if (!data?.user) {
+        throw new Error("No user data returned from login attempt");
+      }
+
+      console.log("Login successful for user:", data.user.id);
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -53,7 +61,7 @@ export const LoginForm = () => {
       console.error("Login error:", error);
       setError(error.message);
       toast({
-        title: "Error",
+        title: "Login Failed",
         description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -78,6 +86,7 @@ export const LoginForm = () => {
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
           disabled={loading}
+          placeholder="Enter your email"
         />
       </div>
       <div>
@@ -89,6 +98,7 @@ export const LoginForm = () => {
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           required
           disabled={loading}
+          placeholder="Enter your password"
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
