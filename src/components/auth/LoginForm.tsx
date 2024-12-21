@@ -21,30 +21,32 @@ export const LoginForm = () => {
     setError(null);
 
     try {
-      console.log("Starting login attempt with email:", formData.email);
-      
-      if (!formData.email || !formData.password) {
+      // Validate inputs
+      if (!formData.email.trim() || !formData.password.trim()) {
         throw new Error("Please enter both email and password");
       }
 
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login with email:", formData.email);
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email.trim(),
-        password: formData.password,
+        password: formData.password.trim(),
       });
 
-      if (authError) {
-        console.error("Auth error details:", {
-          status: authError.status,
-          message: authError.message,
-          name: authError.name
+      if (signInError) {
+        console.error("Login error details:", {
+          type: signInError.name,
+          message: signInError.message,
+          status: signInError.status
         });
-        
-        if (authError.message?.includes("Invalid login credentials")) {
+
+        // Handle specific error cases
+        if (signInError.message.includes("Invalid login credentials")) {
           throw new Error("Invalid email or password. Please check your credentials and try again.");
-        } else if (authError.message?.includes("Email not confirmed")) {
+        } else if (signInError.message.includes("Email not confirmed")) {
           throw new Error("Please verify your email address before logging in.");
         } else {
-          throw new Error("An error occurred during login. Please try again.");
+          throw new Error(signInError.message || "An error occurred during login. Please try again.");
         }
       }
 
@@ -53,6 +55,7 @@ export const LoginForm = () => {
       }
 
       console.log("Login successful for user:", data.user.id);
+      
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -62,7 +65,7 @@ export const LoginForm = () => {
       setError(error.message);
       toast({
         title: "Login Failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -87,6 +90,7 @@ export const LoginForm = () => {
           required
           disabled={loading}
           placeholder="Enter your email"
+          className="mt-1"
         />
       </div>
       <div>
@@ -99,6 +103,7 @@ export const LoginForm = () => {
           required
           disabled={loading}
           placeholder="Enter your password"
+          className="mt-1"
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
