@@ -137,6 +137,7 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           job={job}
+          department={department}
         />
       )}
 
