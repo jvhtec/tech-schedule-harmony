@@ -20,11 +20,9 @@ const Auth = () => {
   }
 
   if (session) {
-      navigate("/dashboard"); // Redirect on successful login
-    } else if (error) {
-      console.error("Login error:", error.message);
-    }
-  };
+    navigate("/dashboard"); // Redirect on successful login
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-8 md:py-12">
