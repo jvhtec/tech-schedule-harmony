@@ -40,7 +40,23 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
 
     try {
       console.log("Starting signup process with email:", formData.email);
-      
+
+      // First create the technician record
+      const { error: techError } = await supabase.from("technicians").insert({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        dni: formData.dni,
+        residencia: formData.residencia,
+      });
+
+      if (techError) {
+        console.error("Technician creation error:", techError);
+        throw techError;
+      }
+
+      // Then create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -59,36 +75,6 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
 
       if (!authData.user) {
         throw new Error("No user data returned from signup");
-      }
-
-      console.log("Auth user created:", authData.user.id);
-
-      const { error: techError } = await supabase.from("technicians").insert({
-        id: authData.user.id,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        department: formData.department,
-        dni: formData.dni,
-        residencia: formData.residencia,
-      });
-
-      if (techError) {
-        console.error("Technician creation error:", techError);
-        throw techError;
-      }
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          role: 'technician',
-          name: formData.name 
-        })
-        .eq('id', authData.user.id);
-
-      if (profileError) {
-        console.error("Profile update error:", profileError);
-        throw profileError;
       }
 
       console.log("Signup completed successfully");

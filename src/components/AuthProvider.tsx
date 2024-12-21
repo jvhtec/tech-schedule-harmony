@@ -44,29 +44,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Starting sign out process");
     
     try {
-      // First attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Supabase signOut error:", error);
-      }
-    } catch (error) {
-      console.error("Error during signOut:", error);
-    } finally {
-      // Always clear local state and storage, regardless of server response
-      console.log("Clearing local state and storage");
+      // First clear local state
       setSession(null);
       setUserRole(null);
       
-      // Clear all Supabase-related items from localStorage
+      // Clear Supabase-related items from localStorage
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith('supabase.auth.')) {
           localStorage.removeItem(key);
         }
       });
 
-      // Force refresh the auth state
-      await supabase.auth.refreshSession();
-      console.log("Sign out process completed");
+      // Then attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Supabase signOut error:", error);
+      }
+    } catch (error) {
+      console.error("Error during signOut:", error);
     }
   };
 
@@ -81,19 +76,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (!mounted) return;
 
-        // Only set session and fetch role if we have a valid session
         if (initialSession?.user) {
           const role = await fetchUserRole(initialSession.user.id);
           setSession(initialSession);
           setUserRole(role);
         } else {
-          // Clear session and role if no valid session exists
           setSession(null);
           setUserRole(null);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        // On error, ensure we clear the session and role
         setSession(null);
         setUserRole(null);
       } finally {
