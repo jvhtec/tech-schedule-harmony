@@ -12,6 +12,16 @@ import { EditJobDialog } from "./EditJobDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface JobActionsProps {
   job: Job;
@@ -20,16 +30,29 @@ interface JobActionsProps {
 
 export const JobActions = ({ job, department }: JobActionsProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     try {
-      console.log("Deleting job:", job.id);
-      
-      if (job.job_type === 'tour') {
-        // First delete all tour dates associated with this tour
-        console.log("Deleting tour dates for tour:", job.id);
+      console.log("Deleting job:", job);
+
+      // If this is a tour date (has tour_id), just delete this specific date
+      if (job.tour_id) {
+        console.log("Deleting single tour date:", job.id);
+        const { error } = await supabase
+          .from("jobs")
+          .delete()
+          .eq("id", job.id);
+
+        if (error) {
+          console.error("Error deleting tour date:", error);
+          throw error;
+        }
+      } else if (job.job_type === 'tour') {
+        // If this is a main tour entry, delete all associated dates first
+        console.log("Deleting entire tour and its dates:", job.id);
         const { error: tourDatesError } = await supabase
           .from("jobs")
           .delete()
@@ -39,17 +62,28 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
           console.error("Error deleting tour dates:", tourDatesError);
           throw tourDatesError;
         }
-      }
 
-      // Then delete the job itself
-      const { error } = await supabase
-        .from("jobs")
-        .delete()
-        .eq("id", job.id);
+        // Then delete the main tour entry
+        const { error } = await supabase
+          .from("jobs")
+          .delete()
+          .eq("id", job.id);
 
-      if (error) {
-        console.error("Error deleting job:", error);
-        throw error;
+        if (error) {
+          console.error("Error deleting main tour:", error);
+          throw error;
+        }
+      } else {
+        // Regular job deletion
+        const { error } = await supabase
+          .from("jobs")
+          .delete()
+          .eq("id", job.id);
+
+        if (error) {
+          console.error("Error deleting job:", error);
+          throw error;
+        }
       }
 
       toast({
@@ -59,13 +93,24 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
 
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     } catch (error) {
-      console.error("Error deleting job:", error);
+      console.error("Error in delete operation:", error);
       toast({
         title: "Error",
         description: "Failed to delete job",
         variant: "destructive",
       });
+    } finally {
+      setShowDeleteConfirm(false);
     }
+  };
+
+  const getDeleteConfirmMessage = () => {
+    if (job.tour_id) {
+      return "Are you sure you want to delete this tour date?";
+    } else if (job.job_type === 'tour') {
+      return "Are you sure you want to delete this entire tour and all its dates?";
+    }
+    return "Are you sure you want to delete this job?";
   };
 
   return (
@@ -81,7 +126,10 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
             <Pencil className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+          <DropdownMenuItem 
+            onClick={() => setShowDeleteConfirm(true)} 
+            className="text-destructive"
+          >
             <Trash className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
@@ -94,6 +142,23 @@ export const JobActions = ({ job, department }: JobActionsProps) => {
         job={job}
         department={department}
       />
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Confirmation</AlertDialogTitle>
+            <AlertDialogDescription>
+              {getDeleteConfirmMessage()}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
