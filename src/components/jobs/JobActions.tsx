@@ -1,17 +1,18 @@
-import { Job } from "@/types/job";
-import { Button } from "@/components/ui/button";
-import { MoreVertical, Pencil, Trash } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, UserPlus, CalendarPlus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { EditJobDialog } from "./EditJobDialog";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { AssignTechnicianDialog } from "../AssignTechnicianDialog";
+import { Department } from "@/types/department";
+import { Job } from "@/types/job";
+import { useAuth } from "@/components/AuthProvider";
+import { AddTourDateDialog } from "../tour/AddTourDateDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,138 +23,155 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface JobActionsProps {
   job: Job;
-  department: "sound" | "lights" | "video";
+  department: Department;
 }
 
 export const JobActions = ({ job, department }: JobActionsProps) => {
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showAddDateDialog, setShowAddDateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { userRole } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  if (userRole !== 'management') return null;
+
   const handleDelete = async () => {
     try {
-      console.log("Deleting job:", job);
-
-      // If this is a tour date (has tour_id), just delete this specific date
-      if (job.tour_id) {
-        console.log("Deleting single tour date:", job.id);
-        const { error } = await supabase
-          .from("jobs")
-          .delete()
-          .eq("id", job.id);
-
-        if (error) {
-          console.error("Error deleting tour date:", error);
-          throw error;
-        }
-      } else if (job.job_type === 'tour') {
-        // If this is a main tour entry, delete all associated dates first
-        console.log("Deleting entire tour and its dates:", job.id);
+      if (job.job_type === 'tour') {
+        // Delete all tour dates first
         const { error: tourDatesError } = await supabase
-          .from("jobs")
+          .from('jobs')
           .delete()
-          .eq("tour_id", job.id);
+          .eq('tour_id', job.id);
 
-        if (tourDatesError) {
-          console.error("Error deleting tour dates:", tourDatesError);
-          throw tourDatesError;
-        }
-
-        // Then delete the main tour entry
-        const { error } = await supabase
-          .from("jobs")
-          .delete()
-          .eq("id", job.id);
-
-        if (error) {
-          console.error("Error deleting main tour:", error);
-          throw error;
-        }
-      } else {
-        // Regular job deletion
-        const { error } = await supabase
-          .from("jobs")
-          .delete()
-          .eq("id", job.id);
-
-        if (error) {
-          console.error("Error deleting job:", error);
-          throw error;
-        }
+        if (tourDatesError) throw tourDatesError;
       }
+
+      // Delete the job itself
+      const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', job.id);
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
 
       toast({
         title: "Success",
         description: "Job deleted successfully",
       });
-
-      queryClient.invalidateQueries({ queryKey: ["jobs"] });
     } catch (error) {
-      console.error("Error in delete operation:", error);
+      console.error('Error deleting job:', error);
       toast({
         title: "Error",
         description: "Failed to delete job",
         variant: "destructive",
       });
-    } finally {
-      setShowDeleteConfirm(false);
     }
   };
 
-  const getDeleteConfirmMessage = () => {
-    if (job.tour_id) {
-      return "Are you sure you want to delete this tour date?";
-    } else if (job.job_type === 'tour') {
-      return "Are you sure you want to delete this entire tour and all its dates?";
+  const getDeleteDialogContent = () => {
+    if (job.job_type === 'tour') {
+      return {
+        title: "Delete Tour",
+        description: "Are you sure you want to delete this tour? This will also delete all associated tour dates.",
+      };
+    } else if (job.tour_id) {
+      return {
+        title: "Delete Tour Date",
+        description: "Are you sure you want to delete this tour date?",
+      };
     }
-    return "Are you sure you want to delete this job?";
+    return {
+      title: "Delete Job",
+      description: "Are you sure you want to delete this job?",
+    };
   };
+
+  const deleteDialogContent = getDeleteDialogContent();
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="h-4 w-4" />
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
             <Pencil className="mr-2 h-4 w-4" />
             Edit
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setShowAssignDialog(true)}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Assign Technician
+          </DropdownMenuItem>
+          {job.job_type === 'tour' && (
+            <DropdownMenuItem onClick={() => setShowAddDateDialog(true)}>
+              <CalendarPlus className="mr-2 h-4 w-4" />
+              Add Date
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem 
-            onClick={() => setShowDeleteConfirm(true)} 
-            className="text-destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-destructive focus:text-destructive"
           >
-            <Trash className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditJobDialog
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        job={job}
-        department={department}
-      />
+      {showEditDialog && (
+        <EditJobDialog
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          job={job}
+        />
+      )}
 
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      {showAssignDialog && (
+        <AssignTechnicianDialog
+          open={showAssignDialog}
+          onOpenChange={setShowAssignDialog}
+          jobId={job.id}
+          jobTitle={job.title}
+          department={department}
+        />
+      )}
+
+      {showAddDateDialog && (
+        <AddTourDateDialog
+          open={showAddDateDialog}
+          onOpenChange={setShowAddDateDialog}
+          tour={job}
+        />
+      )}
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Confirmation</AlertDialogTitle>
+            <AlertDialogTitle>{deleteDialogContent.title}</AlertDialogTitle>
             <AlertDialogDescription>
-              {getDeleteConfirmMessage()}
+              {deleteDialogContent.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
