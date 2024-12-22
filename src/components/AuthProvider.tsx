@@ -56,10 +56,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       // Then attempt to sign out from Supabase
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        console.error("Error during Supabase signOut:", signOutError);
+        // We've already cleared local state, so we can ignore this error
+      }
     } catch (error) {
-      console.error("Error during signOut:", error);
-      // Even if there's an error, we want to clear the local state
+      console.error("Error during signOut cleanup:", error);
+      // Even if there's an error, we want to ensure local state is cleared
       setSession(null);
       setUserRole(null);
     }
