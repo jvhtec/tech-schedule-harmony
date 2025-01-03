@@ -4,6 +4,7 @@ export type VideoRole = "Responsable de Video" | "Tecnico de Video" | "Operador/
 
 export interface Assignment {
   id: string;
+  created_at: string;
   job_id: string;
   technician_id: string;
   status: string;
@@ -12,5 +13,7 @@ export interface Assignment {
   video_role?: VideoRole;
   technicians: {
     name: string;
+    email: string;
+    department: string;
   };
 }

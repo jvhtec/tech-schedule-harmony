@@ -30,7 +30,12 @@ export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
           )
         `)
         .eq("job_id", jobId);
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error fetching assignments:", error);
+        throw error;
+      }
+
       console.log("Assignments data:", data);
       return data as Assignment[];
     },
@@ -52,13 +57,15 @@ export const JobAssignments = ({ jobId, department }: JobAssignmentsProps) => {
     <div className="mt-2 space-y-1">
       {filteredAssignments.map((assignment) => {
         const role = assignment.sound_role || assignment.lights_role || assignment.video_role;
+        const technicianData = assignment.technicians as TechnicianData;
+        
         return (
           <div
             key={assignment.id}
             className="text-sm text-muted-foreground flex items-center gap-1"
           >
             <span className="font-medium">
-              {(assignment.technicians as TechnicianData).name}
+              {technicianData.name}
             </span>
             <span className="text-xs">({role})</span>
           </div>

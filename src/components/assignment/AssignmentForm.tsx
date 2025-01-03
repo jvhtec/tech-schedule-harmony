@@ -15,6 +15,7 @@ import { Department } from "@/types/job";
 import { Technician } from "@/types/technician";
 import { useQuery } from "@tanstack/react-query";
 import { CurrentAssignments } from "./CurrentAssignments";
+import { Assignment } from "@/types/assignment";
 
 const DEPARTMENT_ROLES = {
   sound: [
@@ -71,9 +72,14 @@ export const AssignmentForm = ({
           )
         `)
         .eq("job_id", jobId);
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error fetching assignments:", error);
+        throw error;
+      }
+
       console.log("Assignments data:", data);
-      return data;
+      return data as Assignment[];
     },
   });
 
