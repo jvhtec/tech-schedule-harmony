@@ -41,29 +41,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     try {
       console.log("Starting signup process with email:", formData.email);
 
-      // First sign up the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-          },
-        },
-      });
-
-      if (authError) {
-        console.error("Auth error:", authError);
-        throw authError;
-      }
-
-      if (!authData.user) {
-        throw new Error("No user data returned from signup");
-      }
-
-      console.log("Auth signup successful, creating technician record");
-
-      // Then create the technician record
+      // Create the technician record first
       const { error: techError } = await supabase
         .from("technicians")
         .insert({
@@ -78,6 +56,22 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
       if (techError) {
         console.error("Technician creation error:", techError);
         throw techError;
+      }
+
+      // Then sign up the user with Supabase Auth
+      const { error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+          },
+        },
+      });
+
+      if (authError) {
+        console.error("Auth error:", authError);
+        throw authError;
       }
 
       console.log("Signup completed successfully");
