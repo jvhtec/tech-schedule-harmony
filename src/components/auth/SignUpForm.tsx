@@ -41,25 +41,8 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     try {
       console.log("Starting signup process with email:", formData.email);
 
-      // Create the technician record first
-      const { error: techError } = await supabase
-        .from("technicians")
-        .insert({
-          name: formData.name,
-          email: formData.email.toLowerCase(),
-          phone: formData.phone || null,
-          department: formData.department,
-          dni: formData.dni || null,
-          residencia: formData.residencia || null,
-        });
-
-      if (techError) {
-        console.error("Technician creation error:", techError);
-        throw techError;
-      }
-
-      // Then sign up the user with Supabase Auth
-      const { error: authError } = await supabase.auth.signUp({
+      // First sign up the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -72,6 +55,30 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
       if (authError) {
         console.error("Auth error:", authError);
         throw authError;
+      }
+
+      if (!authData.user) {
+        throw new Error("No user data returned from signup");
+      }
+
+      console.log("Auth signup successful, creating technician record");
+
+      // Then create the technician record
+      const { error: techError } = await supabase
+        .from("technicians")
+        .insert({
+          id: authData.user.id,  // Use the auth user's ID
+          name: formData.name,
+          email: formData.email.toLowerCase(),
+          phone: formData.phone || null,
+          department: formData.department,
+          dni: formData.dni || null,
+          residencia: formData.residencia || null,
+        });
+
+      if (techError) {
+        console.error("Technician creation error:", techError);
+        throw techError;
       }
 
       console.log("Signup completed successfully");
