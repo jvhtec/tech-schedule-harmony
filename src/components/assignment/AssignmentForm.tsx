@@ -78,8 +78,10 @@ export const AssignmentForm = ({
         throw error;
       }
 
+      if (!data) return [];
+
       console.log("Assignments data:", data);
-      return data as Assignment[];
+      return data as unknown as Assignment[];
     },
   });
 
