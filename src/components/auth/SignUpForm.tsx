@@ -41,7 +41,25 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
     try {
       console.log("Starting signup process with email:", formData.email);
 
-      // Create technician record which will trigger the database function to create auth user and profile
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email.toLowerCase(),
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name,
+          },
+        },
+      });
+
+      if (authError) {
+        console.error("Auth error:", authError);
+        throw authError;
+      }
+
+      console.log("Auth user created successfully");
+
+      // Then create technician record
       const { error: techError } = await supabase
         .from("technicians")
         .insert({
@@ -65,7 +83,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         description: "Please check your email to verify your account.",
       });
 
-      // Wait a moment before redirecting to ensure all operations are complete
+      // Wait a moment before redirecting
       setTimeout(() => {
         navigate("/");
       }, 2000);
