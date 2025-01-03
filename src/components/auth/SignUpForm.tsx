@@ -48,6 +48,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         options: {
           data: {
             name: formData.name,
+            role: 'technician' // Explicitly set role to technician
           },
         },
       });
@@ -67,7 +68,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
       const { error: techError } = await supabase
         .from("technicians")
         .insert({
-          id: authData.user.id,  // Use the auth user's ID
+          id: authData.user.id,
           name: formData.name,
           email: formData.email.toLowerCase(),
           phone: formData.phone || null,
@@ -88,6 +89,7 @@ export const SignUpForm = ({ onBack }: { onBack: () => void }) => {
         description: "Please check your email to verify your account.",
       });
 
+      // Wait a moment before redirecting to ensure all operations are complete
       setTimeout(() => {
         navigate("/");
       }, 2000);
